@@ -1,0 +1,14 @@
+@import "tailwindcss";
+
+@theme inline {
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --color-marca: #b91c1c;
+  --color-marca-oscuro: #991b1b;
+  --color-marca-claro: #fef2f2;
+}
+
+body {
+  background: #f3f4f6;
+  color: #111827;
+}

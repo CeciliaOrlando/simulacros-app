@@ -1,0 +1,37 @@
+import type { Metadata, Viewport } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
+import "./globals.css";
+
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+export const metadata: Metadata = {
+  title: {
+    default: "Sistema de Simulacros",
+    template: "%s · Sistema de Simulacros",
+  },
+  description:
+    "Programación de simulacros de emergencia y aviso a empleados por mail y SMS.",
+};
+
+export const viewport: Viewport = {
+  themeColor: "#b91c1c",
+};
+
+export default function RootLayout({ children }: LayoutProps<"/">) {
+  return (
+    <html
+      lang="es"
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+    >
+      <body className="min-h-full font-sans">{children}</body>
+    </html>
+  );
+}
