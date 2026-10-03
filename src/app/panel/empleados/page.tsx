@@ -58,7 +58,7 @@ export default async function PaginaEmpleados({ searchParams }: PageProps<"/pane
         <div>
           <h1 className="text-2xl font-semibold tracking-tight text-gray-900">Empleados</h1>
           <p className="mt-1 text-sm text-gray-500">
-            {empresa ? `Personal de ${empresa.nombre}.` : "Alta, baja y edición del personal de la empresa."}
+            {empresa ? `Personal de ${empresa.nombre}${empresa.nombre.endsWith(".") ? "" : "."}` : "Alta, baja y edición del personal de la empresa."}
           </p>
         </div>
         {esSuperadmin && empresaId && <SelectorEmpresa empresas={empresas} seleccionada={empresaId} />}

@@ -15,6 +15,12 @@ type Dialogo =
   | { tipo: "importar" }
   | null;
 
+const TITULO_CONTADOR: Record<RolEmpleado, string> = {
+  general: "General",
+  coordinador: "Coordinadores",
+  brigadista: "Brigadistas",
+};
+
 const COLOR_ROL: Record<RolEmpleado, string> = {
   general: "bg-gray-100 text-gray-700",
   coordinador: "bg-amber-100 text-amber-800",
@@ -56,7 +62,7 @@ export function GestionEmpleados({
     { valor: "todos", titulo: "Total", cantidad: empleados.length },
     ...ROLES.map((rol) => ({
       valor: rol,
-      titulo: rol === "general" ? "General" : `${ETIQUETA_ROL[rol]}es`,
+      titulo: TITULO_CONTADOR[rol],
       cantidad: conteo[rol],
     })),
   ];
