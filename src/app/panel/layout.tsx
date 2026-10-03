@@ -1,30 +1,20 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Logo } from "@/components/Logo";
+import { obtenerPerfil } from "@/lib/perfil";
 import { createClient } from "@/lib/supabase/server";
 import { cerrarSesion } from "@/app/auth/actions";
 import { MenuLateral } from "./MenuLateral";
 
-type Perfil = {
-  nombre: string;
-  rol: "superadmin" | "gerente";
-  empresas: { nombre: string } | null;
-};
-
 export default async function LayoutPanel({ children }: LayoutProps<"/panel">) {
   const supabase = await createClient();
   const { data: auth } = await supabase.auth.getClaims();
-  const idUsuario = auth?.claims?.sub;
 
-  if (!idUsuario) {
+  if (!auth?.claims?.sub) {
     redirect("/login");
   }
 
-  const { data: perfil } = await supabase
-    .from("perfiles")
-    .select("nombre, rol, empresas(nombre)")
-    .eq("id", idUsuario)
-    .maybeSingle<Perfil>();
+  const perfil = await obtenerPerfil();
 
   const nombreEmpresa =
     perfil?.rol === "superadmin"
