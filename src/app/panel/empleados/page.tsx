@@ -1,57 +1,27 @@
 import type { Metadata } from "next";
-import { obtenerPerfil } from "@/lib/perfil";
+import { SelectorEmpresa } from "@/components/SelectorEmpresa";
+import { obtenerEmpresaActiva } from "@/lib/empresa-activa";
 import { createClient } from "@/lib/supabase/server";
 import type { Empleado } from "@/lib/empleados";
 import { GestionEmpleados } from "./GestionEmpleados";
-import { SelectorEmpresa } from "./SelectorEmpresa";
 
 export const metadata: Metadata = { title: "Empleados" };
 
-type Empresa = {
-  id: string;
-  nombre: string;
-  zona_resguardo: string | null;
-  punto_encuentro: string | null;
-};
-
 export default async function PaginaEmpleados({ searchParams }: PageProps<"/panel/empleados">) {
   const { empresa: empresaParam } = await searchParams;
-  const perfil = await obtenerPerfil();
+  const { perfil, esSuperadmin, empresas, empresa } = await obtenerEmpresaActiva(empresaParam);
   if (!perfil) return null; // el layout ya muestra el aviso de perfil faltante
 
   const supabase = await createClient();
-  const esSuperadmin = perfil.rol === "superadmin";
-
-  // El superadmin elige la empresa; el gerente siempre ve la suya (RLS lo garantiza igual).
-  let empresas: Empresa[] = [];
-  let empresaId = perfil.empresa_id;
-  if (esSuperadmin) {
-    const { data } = await supabase
-      .from("empresas")
-      .select("id, nombre, zona_resguardo, punto_encuentro")
-      .order("nombre");
-    empresas = data ?? [];
-    const solicitada = typeof empresaParam === "string" ? empresaParam : undefined;
-    empresaId = empresas.find((e) => e.id === solicitada)?.id ?? empresas[0]?.id ?? null;
-  }
-
-  const [{ data: empresa }, { data: empleados }] = empresaId
-    ? await Promise.all([
-        supabase
-          .from("empresas")
-          .select("id, nombre, zona_resguardo, punto_encuentro")
-          .eq("id", empresaId)
-          .maybeSingle<Empresa>(),
-        supabase
-          .from("empleados")
-          .select("id, nombre, apellido, email, celular, area, rol")
-          .eq("empresa_id", empresaId)
-          .order("apellido")
-          .order("nombre")
-          .returns<Empleado[]>(),
-      ])
-    : [{ data: null }, { data: null }];
-
+  const { data: empleados } = empresa
+    ? await supabase
+        .from("empleados")
+        .select("id, nombre, apellido, email, celular, area, rol")
+        .eq("empresa_id", empresa.id)
+        .order("apellido")
+        .order("nombre")
+        .returns<Empleado[]>()
+    : { data: null };
   return (
     <section>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -61,7 +31,7 @@ export default async function PaginaEmpleados({ searchParams }: PageProps<"/pane
             {empresa ? `Personal de ${empresa.nombre}${empresa.nombre.endsWith(".") ? "" : "."}` : "Alta, baja y edición del personal de la empresa."}
           </p>
         </div>
-        {esSuperadmin && empresaId && <SelectorEmpresa empresas={empresas} seleccionada={empresaId} />}
+        {esSuperadmin && empresa && <SelectorEmpresa empresas={empresas} seleccionada={empresa.id} />}
       </div>
 
       <div className="mt-6">

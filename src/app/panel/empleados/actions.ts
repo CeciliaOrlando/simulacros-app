@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { obtenerPerfil } from "@/lib/perfil";
+import { empresaPermitida } from "@/lib/empresa-activa";
 import {
   validarEmpleado,
   type DatosEmpleado,
@@ -22,18 +22,6 @@ export type ResultadoImportacion =
   | { ok: false; error: string };
 
 const RUTA = "/panel/empleados";
-
-/**
- * Determina sobre qué empresa puede operar el usuario.
- * El gerente siempre opera sobre la suya (se ignora lo que mande el navegador);
- * el superadmin, sobre la que eligió. RLS vuelve a verificarlo en la base.
- */
-async function empresaPermitida(empresaIdSolicitada: string): Promise<string | null> {
-  const perfil = await obtenerPerfil();
-  if (!perfil) return null;
-  if (perfil.rol === "superadmin") return empresaIdSolicitada || null;
-  return perfil.empresa_id;
-}
 
 /** Busca empleados de la empresa con el mismo email o celular (excluyendo uno opcional). */
 async function buscarRepetido(

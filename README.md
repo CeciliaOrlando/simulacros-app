@@ -18,3 +18,10 @@ Web app para que gerentes de distintas empresas programen simulacros de emergenc
 - `src/proxy.ts` — protege todas las rutas salvo `/login` (en Next.js 16 el middleware se llama "proxy").
 - `src/app/login` — inicio de sesión.
 - `src/app/panel` — panel con Empleados, Simulacros y Reportes.
+- `src/app/api/cron` — envía los avisos por mail 48 h antes (requiere `Authorization: Bearer $CRON_SECRET`).
+- `src/lib/avisos.ts` — envío de avisos con Brevo y registro en `envios`.
+
+## Probar el cron a mano
+```bash
+curl -H "Authorization: Bearer $(grep '^CRON_SECRET=' .env.local | cut -d= -f2)" http://localhost:3000/api/cron
+```
