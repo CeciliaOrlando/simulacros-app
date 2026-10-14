@@ -12,7 +12,28 @@ export type DatosMailAviso = {
   esPrueba?: boolean;
 };
 
-const ROJO = "#B91C1C";
+// Identidad LGV Consultora
+const NAVY = "#1B2A4A";
+const ORO = "#C9A84C";
+const CELESTE = "#EBF4FB";
+const SERIF = "Georgia,'Times New Roman',serif";
+
+/**
+ * URL pública del logo. Los clientes de correo no pueden ver imágenes de localhost,
+ * así que mientras URL_PUBLICA_APP no esté configurada se muestra un sello "LGV" de texto.
+ */
+function urlLogo(): string | null {
+  const base = process.env.URL_PUBLICA_APP?.trim().replace(/\/+$/, "");
+  return base && !/localhost|127\.0\.0\.1/.test(base) ? `${base}/logo-lgv-email.png` : null;
+}
+
+function logoHtml(): string {
+  const url = urlLogo();
+  if (url) {
+    return `<img src="${escapar(url)}" width="64" height="64" alt="LGV Consultora" style="display:block;width:64px;height:64px;border-radius:50%;border:2px solid ${ORO};">`;
+  }
+  return `<div style="width:60px;height:60px;line-height:60px;border-radius:50%;border:2px solid ${ORO};background:#FFFFFF;color:${NAVY};font-family:${SERIF};font-size:18px;font-weight:bold;text-align:center;">LGV</div>`;
+}
 const AVISO_SMS =
   "IMPORTANTE: mantené activadas las notificaciones de mensajes de texto (SMS) con sonido y vibración. El inicio del simulacro se avisará por SMS.";
 
@@ -33,7 +54,7 @@ const conSaltos = (texto: string) => escapar(texto).replace(/\r?\n/g, "<br>");
 function filaDato(etiqueta: string, valor: string): string {
   return `
             <tr>
-              <td style="padding:10px 0;border-bottom:1px solid #E5E7EB;width:42%;vertical-align:top;font-size:13px;color:#6B7280;">${escapar(etiqueta)}</td>
+              <td style="padding:10px 0;border-bottom:1px solid #E5E7EB;width:42%;vertical-align:top;font-size:13px;color:#4B5563;">${escapar(etiqueta)}</td>
               <td style="padding:10px 0;border-bottom:1px solid #E5E7EB;vertical-align:top;font-size:15px;color:#111827;font-weight:600;">${conSaltos(valor)}</td>
             </tr>`;
 }
@@ -55,7 +76,7 @@ export function generarMailAviso(d: DatosMailAviso): { asunto: string; html: str
       ? `
           <tr>
             <td style="padding:8px 32px 0 32px;">
-              <h2 style="margin:0 0 10px 0;font-size:16px;color:${ROJO};">Tus instrucciones</h2>
+              <h2 style="margin:0 0 10px 0;padding-left:10px;border-left:4px solid ${ORO};font-family:${SERIF};font-size:17px;color:${NAVY};">Tus instrucciones</h2>
               <div style="padding:14px 16px;background:#F9FAFB;border:1px solid #E5E7EB;border-radius:6px;font-size:14px;line-height:1.6;color:#111827;">
                 ${instrucciones ? conSaltos(instrucciones) : "Tu gerente todavía no cargó instrucciones para este simulacro."}
               </div>
@@ -70,15 +91,23 @@ export function generarMailAviso(d: DatosMailAviso): { asunto: string; html: str
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${escapar(asunto)}</title>
 </head>
-<body style="margin:0;padding:0;background:#F3F4F6;font-family:Arial,Helvetica,sans-serif;">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F3F4F6;padding:24px 12px;">
+<body style="margin:0;padding:0;background:${CELESTE};font-family:'Open Sans',Arial,Helvetica,sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${CELESTE};padding:24px 12px;">
     <tr>
       <td align="center">
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#FFFFFF;border-radius:8px;overflow:hidden;border:1px solid #E5E7EB;">
           <tr>
-            <td style="background:${ROJO};padding:24px 32px;color:#FFFFFF;">
-              <p style="margin:0;font-size:12px;letter-spacing:1px;text-transform:uppercase;opacity:0.85;">${d.esPrueba ? "Mail de prueba · " : ""}Aviso de simulacro</p>
-              <h1 style="margin:6px 0 0 0;font-size:22px;line-height:1.3;">${escapar(d.empresa.nombre)}</h1>
+            <td style="background:${NAVY};border-bottom:3px solid ${ORO};padding:22px 28px;color:#FFFFFF;">
+              <table role="presentation" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="padding-right:16px;vertical-align:middle;">${logoHtml()}</td>
+                  <td style="vertical-align:middle;">
+                    <p style="margin:0;font-size:11px;font-weight:bold;letter-spacing:3px;text-transform:uppercase;color:${ORO};">LGV Consultora</p>
+                    <p style="margin:4px 0 0 0;font-size:12px;letter-spacing:1px;text-transform:uppercase;color:#D6E8F7;">${d.esPrueba ? "Mail de prueba · " : ""}Aviso de simulacro</p>
+                    <h1 style="margin:6px 0 0 0;font-family:${SERIF};font-size:22px;line-height:1.3;color:#FFFFFF;">${escapar(d.empresa.nombre)}</h1>
+                  </td>
+                </tr>
+              </table>
             </td>
           </tr>
           <tr>
@@ -95,14 +124,15 @@ export function generarMailAviso(d: DatosMailAviso): { asunto: string; html: str
           </tr>
           <tr>
             <td style="padding:8px 32px 20px 32px;">
-              <div style="padding:16px 18px;background:#FEF2F2;border:2px solid ${ROJO};border-radius:6px;font-size:15px;line-height:1.5;color:#7F1D1D;">
+              <div style="padding:16px 18px;background:${CELESTE};border:2px solid ${ORO};border-radius:6px;font-size:15px;line-height:1.5;color:${NAVY};">
                 <strong>IMPORTANTE:</strong> mantené activadas las notificaciones de mensajes de texto (SMS) con sonido y vibración. El inicio del simulacro se avisará por SMS.
               </div>
             </td>
           </tr>${seccionInstrucciones}
           <tr>
-            <td style="padding:24px 32px 28px 32px;font-size:12px;line-height:1.5;color:#6B7280;">
-              Este es un aviso automático del Sistema de Simulacros. Por favor, no respondas este mail.
+            <td style="padding:24px 32px 28px 32px;font-size:12px;line-height:1.5;color:#4B5563;border-top:1px solid ${ORO};">
+              Este es un aviso automático del Sistema de Simulacros. Por favor, no respondas este mail.<br>
+              <strong style="color:${NAVY};">LGV Consultora</strong> · Asesoramiento profesional en Higiene y Seguridad en el Trabajo
             </td>
           </tr>
         </table>
@@ -130,6 +160,7 @@ export function generarMailAviso(d: DatosMailAviso): { asunto: string; html: str
       : []),
     "",
     "Este es un aviso automático del Sistema de Simulacros.",
+    "LGV Consultora · Asesoramiento profesional en Higiene y Seguridad en el Trabajo",
   ].join("\n");
 
   return { asunto, html, texto };

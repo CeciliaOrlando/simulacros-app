@@ -74,7 +74,7 @@ export function FormularioEmpleado({
         <label className="block text-sm font-medium text-gray-700">
           Celular
           <input type="tel" inputMode="numeric" className={claseInput} value={entrada.celular} onChange={cambiar("celular")} placeholder="5492614123456" required />
-          <span className="mt-1 block text-xs font-normal text-gray-500">
+          <span className="mt-1 block text-xs font-normal text-gray-600">
             549 + característica + número, sin 0 ni 15.
           </span>
         </label>
@@ -96,7 +96,7 @@ export function FormularioEmpleado({
         </div>
 
         {errores.length > 0 && (
-          <ul role="alert" className="list-inside list-disc rounded-md border border-red-200 bg-marca-claro px-3 py-2 text-sm text-marca-oscuro">
+          <ul role="alert" className="list-inside list-disc rounded-md border border-red-200 bg-alerta-claro px-3 py-2 text-sm text-alerta-oscuro">
             {errores.map((error) => (
               <li key={error}>{error}</li>
             ))}

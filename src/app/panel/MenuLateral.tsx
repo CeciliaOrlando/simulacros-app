@@ -31,7 +31,7 @@ export function MenuLateral() {
   return (
     <nav
       aria-label="Secciones"
-      className="flex gap-1 overflow-x-auto border-b border-gray-200 bg-white px-2 md:w-60 md:shrink-0 md:flex-col md:overflow-visible md:border-r md:border-b-0 md:px-3 md:py-6"
+      className="flex gap-1 overflow-x-auto border-b border-marca-celeste-2 bg-white px-2 md:w-60 md:shrink-0 md:flex-col md:overflow-visible md:border-r md:border-b-0 md:px-3 md:py-6"
     >
       {SECCIONES.map((seccion) => {
         const activa = pathname.startsWith(seccion.href);
@@ -40,10 +40,10 @@ export function MenuLateral() {
             key={seccion.href}
             href={seccion.href}
             aria-current={activa ? "page" : undefined}
-            className={`flex shrink-0 items-center gap-2.5 border-b-2 px-3 py-3 text-sm font-medium transition-colors md:rounded-md md:border-b-0 md:border-l-4 md:py-2.5 ${
+            className={`flex shrink-0 items-center gap-2.5 border-b-2 px-3 py-3 text-sm font-medium transition-colors md:rounded-r-md md:border-b-0 md:border-l-4 md:py-2.5 ${
               activa
-                ? "border-marca text-marca md:bg-marca-claro"
-                : "border-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                ? "border-marca-oro bg-marca-celeste-2 font-semibold text-marca-navy"
+                : "border-transparent text-gray-600 hover:bg-marca-celeste hover:text-marca-navy"
             }`}
           >
             <svg

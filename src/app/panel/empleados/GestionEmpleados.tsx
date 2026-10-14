@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo, useState, useTransition } from "react";
 import { Modal } from "@/components/Modal";
-import { claseBotonPrimario, claseBotonSecundario, claseCampo } from "@/components/clases";
+import { claseBotonPeligro, claseBotonPrimario, claseBotonSecundario, claseCampo } from "@/components/clases";
 import { ETIQUETA_ROL, ROLES, normalizarTexto, type Empleado, type RolEmpleado } from "@/lib/empleados";
 import { eliminarEmpleado } from "./actions";
 import { FormularioEmpleado } from "./FormularioEmpleado";
@@ -23,8 +23,8 @@ const TITULO_CONTADOR: Record<RolEmpleado, string> = {
 
 const COLOR_ROL: Record<RolEmpleado, string> = {
   general: "bg-gray-100 text-gray-700",
-  coordinador: "bg-amber-100 text-amber-800",
-  brigadista: "bg-marca-claro text-marca-oscuro",
+  coordinador: "bg-marca-oro-suave text-marca-navy",
+  brigadista: "bg-marca-azul-suave text-marca-navy",
 };
 
 export function GestionEmpleados({
@@ -77,18 +77,18 @@ export function GestionEmpleados({
             type="button"
             onClick={() => setFiltroRol(t.valor)}
             aria-pressed={filtroRol === t.valor}
-            className={`rounded-lg border bg-white p-4 text-left shadow-sm transition-colors ${
-              filtroRol === t.valor ? "border-marca ring-1 ring-marca" : "border-gray-200 hover:border-gray-300"
+            className={`rounded-lg border border-t-4 border-t-marca-oro bg-white p-4 text-left shadow-sm transition-colors ${
+              filtroRol === t.valor ? "border-marca-oro bg-marca-celeste-2/40 ring-1 ring-marca-oro" : "border-gray-200 hover:border-marca-azul"
             }`}
           >
-            <span className="block text-sm text-gray-500">{t.titulo}</span>
-            <span className="mt-1 block text-2xl font-semibold text-gray-900">{t.cantidad}</span>
+            <span className="block text-xs font-semibold tracking-wider text-marca-navy uppercase">{t.titulo}</span>
+            <span className="mt-1 block font-serif text-2xl font-bold text-marca-navy">{t.cantidad}</span>
           </button>
         ))}
       </div>
 
       {/* Barra de herramientas */}
-      <div className="mt-6 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+      <div className="mt-6 flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
         <div className="flex flex-col gap-3 sm:flex-row">
           <input
             type="search"
@@ -126,21 +126,21 @@ export function GestionEmpleados({
       </div>
 
       {/* Listado */}
-      <div className="mt-4 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
+      <div className="mt-4 overflow-x-auto rounded-lg border border-gray-200 bg-white shadow-sm">
         {empleados.length === 0 ? (
           <div className="px-6 py-14 text-center">
             <p className="font-medium text-gray-700">Todavía no hay empleados cargados.</p>
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="mt-1 text-sm text-gray-600">
               Descargá la plantilla, completala e importala, o agregalos uno por uno.
             </p>
           </div>
         ) : filtrados.length === 0 ? (
-          <p className="px-6 py-10 text-center text-sm text-gray-500">Ningún empleado coincide con la búsqueda.</p>
+          <p className="px-6 py-10 text-center text-sm text-gray-600">Ningún empleado coincide con la búsqueda.</p>
         ) : (
           <>
             {/* Escritorio: tabla */}
             <table className="hidden min-w-full text-left text-sm md:table">
-              <thead className="bg-gray-50 text-xs text-gray-500 uppercase">
+              <thead className="bg-marca-navy text-xs tracking-wider text-white uppercase">
                 <tr>
                   <th className="px-4 py-3">Nombre</th>
                   <th className="px-4 py-3">Apellido</th>
@@ -155,7 +155,7 @@ export function GestionEmpleados({
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {filtrados.map((e) => (
-                  <tr key={e.id} className="hover:bg-gray-50">
+                  <tr key={e.id} className="hover:bg-marca-celeste-2/60">
                     <td className="px-4 py-3 text-gray-900">{e.nombre}</td>
                     <td className="px-4 py-3 text-gray-900">{e.apellido}</td>
                     <td className="px-4 py-3 text-gray-600">{e.email}</td>
@@ -188,7 +188,7 @@ export function GestionEmpleados({
                       </p>
                       <p className="truncate text-sm text-gray-600">{e.email}</p>
                       <p className="text-sm text-gray-600">{e.celular}</p>
-                      {e.area && <p className="text-sm text-gray-500">{e.area}</p>}
+                      {e.area && <p className="text-sm text-gray-600">{e.area}</p>}
                     </div>
                     <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium ${COLOR_ROL[e.rol]}`}>
                       {ETIQUETA_ROL[e.rol]}
@@ -207,7 +207,7 @@ export function GestionEmpleados({
         )}
       </div>
       {empleados.length > 0 && (
-        <p className="mt-2 text-xs text-gray-500">
+        <p className="mt-2 text-xs text-gray-600">
           Mostrando {filtrados.length} de {empleados.length} empleados.
         </p>
       )}
@@ -232,10 +232,10 @@ export function GestionEmpleados({
 function Acciones({ onEditar, onEliminar }: { onEditar: () => void; onEliminar: () => void }) {
   return (
     <div className="flex gap-2 md:justify-end">
-      <button type="button" onClick={onEditar} className="rounded-md px-2.5 py-1 text-sm font-medium text-gray-700 hover:bg-gray-100">
+      <button type="button" onClick={onEditar} className="rounded-md px-2.5 py-1 text-sm font-medium text-marca-azul hover:bg-marca-celeste">
         Editar
       </button>
-      <button type="button" onClick={onEliminar} className="rounded-md px-2.5 py-1 text-sm font-medium text-marca hover:bg-marca-claro">
+      <button type="button" onClick={onEliminar} className="rounded-md px-2.5 py-1 text-sm font-medium text-alerta hover:bg-alerta-claro">
         Eliminar
       </button>
     </div>
@@ -272,7 +272,7 @@ function ConfirmarEliminar({
         ? Esta acción no se puede deshacer.
       </p>
       {error && (
-        <p role="alert" className="mt-3 rounded-md border border-red-200 bg-marca-claro px-3 py-2 text-sm text-marca-oscuro">
+        <p role="alert" className="mt-3 rounded-md border border-red-200 bg-alerta-claro px-3 py-2 text-sm text-alerta-oscuro">
           {error}
         </p>
       )}
@@ -280,7 +280,7 @@ function ConfirmarEliminar({
         <button type="button" onClick={onCerrar} className={claseBotonSecundario}>
           Cancelar
         </button>
-        <button type="button" onClick={confirmar} disabled={eliminando} className={claseBotonPrimario}>
+        <button type="button" onClick={confirmar} disabled={eliminando} className={claseBotonPeligro}>
           {eliminando ? "Eliminando…" : "Sí, eliminar"}
         </button>
       </div>

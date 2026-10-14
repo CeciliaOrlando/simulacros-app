@@ -1,14 +1,33 @@
 @import "tailwindcss";
 
 @theme inline {
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-  --color-marca: #b91c1c;
-  --color-marca-oscuro: #991b1b;
-  --color-marca-claro: #fef2f2;
+  --font-sans: var(--font-open-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-libre-baskerville), Georgia, "Times New Roman", serif;
+
+  /* Identidad LGV Consultora */
+  --color-marca-navy: #1b2a4a; /* principal: barra superior, títulos, botones */
+  --color-marca-navy-2: #1d3861; /* hover de botones, degradés */
+  --color-marca-oro: #c9a84c; /* líneas, bordes y acentos (no para texto sobre blanco) */
+  --color-marca-oro-suave: #f3e9cc; /* fondo de badges dorados */
+  --color-marca-azul: #2563a8; /* links y elementos secundarios */
+  --color-marca-azul-suave: #dce9f8; /* fondo de badges azules */
+  --color-marca-celeste: #ebf4fb; /* fondo general */
+  --color-marca-celeste-2: #d6e8f7; /* tarjetas destacadas, hover de filas */
+
+  /* Rojo reservado para lo peligroso o urgente */
+  --color-alerta: #b91c1c;
+  --color-alerta-oscuro: #991b1b;
+  --color-alerta-claro: #fef2f2;
 }
 
 body {
-  background: #f3f4f6;
+  background: var(--color-marca-celeste);
   color: #111827;
+}
+
+@layer base {
+  h1 {
+    font-family: var(--font-serif);
+    color: var(--color-marca-navy);
+  }
 }

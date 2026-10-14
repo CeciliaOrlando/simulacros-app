@@ -5,6 +5,7 @@ import { ETIQUETA_ROL, type RolEmpleado } from "@/lib/empleados";
 import { COLOR_ESTADO, ETIQUETA_ESTADO, ETIQUETA_HIPOTESIS, type Simulacro } from "@/lib/simulacros";
 import { createClient } from "@/lib/supabase/server";
 import { ZONA_HORARIA, formatearFecha, formatearHora } from "@/lib/zona-horaria";
+import { claseSubtitulo } from "@/components/clases";
 import { AccionesSimulacro } from "./AccionesSimulacro";
 
 export const metadata: Metadata = { title: "Detalle del simulacro" };
@@ -21,9 +22,9 @@ type Envio = {
 
 const ETIQUETA_TIPO_ENVIO = { aviso: "Aviso", alarma: "Alarma", fin: "Fin" } as const;
 const COLOR_ESTADO_ENVIO = {
-  pendiente: "bg-gray-100 text-gray-700",
+  pendiente: "bg-marca-celeste-2 text-marca-navy",
   enviado: "bg-green-100 text-green-800",
-  fallido: "bg-marca-claro text-marca-oscuro",
+  fallido: "bg-alerta-claro text-alerta-oscuro",
 } as const;
 
 export default async function PaginaDetalleSimulacro({ params }: PageProps<"/panel/simulacros/[id]">) {
@@ -64,17 +65,17 @@ export default async function PaginaDetalleSimulacro({ params }: PageProps<"/pan
     <section className="max-w-5xl">
       <Link
         href={`/panel/simulacros?empresa=${simulacro.empresa_id}`}
-        className="text-sm font-medium text-gray-500 hover:text-marca"
+        className="text-sm font-medium text-marca-azul hover:text-marca-navy hover:underline"
       >
         ← Volver a simulacros
       </Link>
 
       <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-gray-900">
+          <h1 className="text-2xl font-bold text-marca-navy">
             Simulacro de {ETIQUETA_HIPOTESIS[simulacro.hipotesis].toLowerCase()}
           </h1>
-          <p className="mt-1 text-sm text-gray-500">{empresa?.nombre}</p>
+          <p className="mt-1 text-sm text-gray-600">{empresa?.nombre}</p>
         </div>
         <span className={`self-start rounded-full px-3 py-1 text-sm font-medium ${COLOR_ESTADO[simulacro.estado]}`}>
           {ETIQUETA_ESTADO[simulacro.estado]}
@@ -82,7 +83,7 @@ export default async function PaginaDetalleSimulacro({ params }: PageProps<"/pan
       </div>
 
       <div className="mt-6 grid gap-4 lg:grid-cols-3">
-        <dl className="grid gap-4 rounded-lg border border-gray-200 bg-white p-5 shadow-sm sm:grid-cols-2 lg:col-span-2">
+        <dl className="grid gap-4 rounded-lg border border-gray-200 border-t-4 border-t-marca-oro bg-white p-5 shadow-sm sm:grid-cols-2 lg:col-span-2">
           <Dato titulo="Fecha" valor={formatearFecha(simulacro.fecha_hora)} />
           <Dato titulo="Hora (Mendoza)" valor={formatearHora(simulacro.fecha_hora)} />
           <Dato titulo="Hipótesis" valor={ETIQUETA_HIPOTESIS[simulacro.hipotesis]} />
@@ -90,16 +91,16 @@ export default async function PaginaDetalleSimulacro({ params }: PageProps<"/pan
           <Dato titulo="Zona de resguardo" valor={empresa?.zona_resguardo || "Sin cargar"} />
           <Dato titulo="Punto de encuentro" valor={empresa?.punto_encuentro || "Sin cargar"} />
           <div className="sm:col-span-2">
-            <dt className="text-xs font-medium text-gray-500 uppercase">Instrucciones para coordinadores y brigadistas</dt>
+            <dt className="text-xs font-semibold tracking-wider text-marca-navy uppercase">Instrucciones para coordinadores y brigadistas</dt>
             <dd className="mt-1 text-sm whitespace-pre-line text-gray-900">
               {simulacro.instrucciones_coordinadores || <span className="text-gray-400">Sin instrucciones.</span>}
             </dd>
           </div>
         </dl>
 
-        <div className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
-          <h2 className="text-sm font-semibold text-gray-900">Acciones</h2>
-          <p className="mt-1 mb-4 text-sm text-gray-500">
+        <div className="rounded-lg border border-gray-200 border-t-4 border-t-marca-oro bg-marca-celeste-2/40 p-5 shadow-sm">
+          <h2 className={claseSubtitulo}>Acciones</h2>
+          <p className="mt-1 mb-4 text-sm text-gray-600">
             {simulacro.estado === "programado"
               ? "El aviso por mail se envía automáticamente 48 h antes, o podés enviarlo ahora."
               : "El aviso ya fue enviado: el simulacro no se puede editar ni cancelar."}
@@ -116,9 +117,9 @@ export default async function PaginaDetalleSimulacro({ params }: PageProps<"/pan
 
       <div className="mt-8">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
-          <h2 className="text-sm font-semibold tracking-wide text-gray-500 uppercase">Envíos ({lista.length})</h2>
+          <h2 className={claseSubtitulo}>Envíos ({lista.length})</h2>
           {lista.length > 0 && (
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-gray-600">
               {resumen.enviado} enviados · {resumen.fallido} fallidos
               {resumen.pendiente > 0 && ` · ${resumen.pendiente} pendientes`}
             </p>
@@ -126,7 +127,7 @@ export default async function PaginaDetalleSimulacro({ params }: PageProps<"/pan
         </div>
         <div className="mt-3 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
           {lista.length === 0 ? (
-            <p className="px-6 py-8 text-center text-sm text-gray-500">Todavía no se realizaron envíos.</p>
+            <p className="px-6 py-8 text-center text-sm text-gray-600">Todavía no se realizaron envíos.</p>
           ) : (
             <ul className="divide-y divide-gray-100">
               {lista.map((envio) => (
@@ -135,18 +136,18 @@ export default async function PaginaDetalleSimulacro({ params }: PageProps<"/pan
                     <p className="text-sm font-medium text-gray-900">
                       {envio.empleados ? `${envio.empleados.nombre} ${envio.empleados.apellido}` : "Empleado eliminado"}
                       {envio.empleados && (
-                        <span className="ml-2 text-xs font-normal text-gray-500">{ETIQUETA_ROL[envio.empleados.rol]}</span>
+                        <span className="ml-2 text-xs font-normal text-gray-600">{ETIQUETA_ROL[envio.empleados.rol]}</span>
                       )}
                     </p>
-                    <p className="truncate text-sm text-gray-500">
+                    <p className="truncate text-sm text-gray-600">
                       {envio.canal === "email" ? "Email" : "SMS"} · {ETIQUETA_TIPO_ENVIO[envio.tipo]}
                       {envio.empleados?.email && ` · ${envio.empleados.email}`}
                     </p>
-                    {envio.error && <p className="mt-0.5 text-xs text-marca">{envio.error}</p>}
+                    {envio.error && <p className="mt-0.5 text-xs text-alerta">{envio.error}</p>}
                   </div>
                   <div className="flex shrink-0 items-center gap-3">
                     {envio.enviado_at && (
-                      <span className="text-xs text-gray-500">
+                      <span className="text-xs text-gray-600">
                         {new Date(envio.enviado_at).toLocaleString("es-AR", {
                           timeZone: ZONA_HORARIA,
                           dateStyle: "short",
@@ -171,7 +172,7 @@ export default async function PaginaDetalleSimulacro({ params }: PageProps<"/pan
 function Dato({ titulo, valor }: { titulo: string; valor: string }) {
   return (
     <div>
-      <dt className="text-xs font-medium text-gray-500 uppercase">{titulo}</dt>
+      <dt className="text-xs font-semibold tracking-wider text-marca-navy uppercase">{titulo}</dt>
       <dd className="mt-1 text-sm whitespace-pre-line text-gray-900">{valor.charAt(0).toUpperCase() + valor.slice(1)}</dd>
     </div>
   );

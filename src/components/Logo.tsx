@@ -1,20 +1,24 @@
-export function Logo({ className = "h-8 w-8" }: { className?: string }) {
+import Image from "next/image";
+
+/** Logo de LGV Consultora recortado en círculo con borde dorado. */
+export function Logo({
+  tamano = 40,
+  className = "",
+  prioridad = false,
+}: {
+  tamano?: number;
+  className?: string;
+  prioridad?: boolean;
+}) {
   return (
-    <svg
-      viewBox="0 0 32 32"
-      className={className}
-      aria-hidden="true"
-      fill="none"
-    >
-      <rect width="32" height="32" rx="8" fill="#B91C1C" />
-      <path
-        d="M16 7 26 24H6L16 7Z"
-        stroke="#fff"
-        strokeWidth="2.2"
-        strokeLinejoin="round"
-      />
-      <path d="M16 14v4.5" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" />
-      <circle cx="16" cy="21.2" r="1.3" fill="#fff" />
-    </svg>
+    <Image
+      src="/logo-lgv.jpg"
+      alt="LGV Consultora"
+      width={tamano}
+      height={tamano}
+      priority={prioridad}
+      className={`shrink-0 rounded-full border border-marca-oro object-cover ${className}`}
+      style={{ width: tamano, height: tamano }}
+    />
   );
 }

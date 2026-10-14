@@ -2,7 +2,7 @@
 
 import { useCallback, useState, useTransition } from "react";
 import { Modal } from "@/components/Modal";
-import { claseBotonPrimario, claseBotonSecundario } from "@/components/clases";
+import { claseBotonPeligro, claseBotonPrimario, claseBotonSecundario } from "@/components/clases";
 import type { Simulacro } from "@/lib/simulacros";
 import { cancelarSimulacro, enviarAvisoAhora, enviarMailPrueba } from "../actions";
 import { FormularioSimulacro } from "../FormularioSimulacro";
@@ -62,7 +62,7 @@ export function AccionesSimulacro({
           className={`mt-3 rounded-md border px-3 py-2 text-sm ${
             mensaje.tipo === "ok"
               ? "border-green-200 bg-green-50 text-green-800"
-              : "border-red-200 bg-marca-claro text-marca-oscuro"
+              : "border-red-200 bg-alerta-claro text-alerta-oscuro"
           }`}
         >
           {mensaje.texto}
@@ -97,7 +97,7 @@ function ConfirmarCancelar({ simulacroId, onCerrar }: { simulacroId: string; onC
       <p className="text-sm text-gray-700">
         El simulacro se eliminará y no se enviará ningún aviso. Esta acción no se puede deshacer.
       </p>
-      {error && <p role="alert" className="mt-3 rounded-md border border-red-200 bg-marca-claro px-3 py-2 text-sm text-marca-oscuro">{error}</p>}
+      {error && <p role="alert" className="mt-3 rounded-md border border-red-200 bg-alerta-claro px-3 py-2 text-sm text-alerta-oscuro">{error}</p>}
       <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
         <button type="button" onClick={onCerrar} className={claseBotonSecundario}>
           Volver
@@ -105,7 +105,7 @@ function ConfirmarCancelar({ simulacroId, onCerrar }: { simulacroId: string; onC
         <button
           type="button"
           disabled={cancelando}
-          className={claseBotonPrimario}
+          className={claseBotonPeligro}
           onClick={() =>
             iniciar(async () => {
               // Si sale bien, la acción redirige a la lista.
@@ -140,7 +140,7 @@ function ConfirmarEnvio({
         Se enviará el mail de aviso a <strong>{cantidad} empleados</strong> con email cargado. Después de enviarlo
         ya no vas a poder editar ni cancelar el simulacro.
       </p>
-      <p className="mt-2 text-sm text-gray-500">¿Querés continuar?</p>
+      <p className="mt-2 text-sm text-gray-600">¿Querés continuar?</p>
       <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
         <button type="button" onClick={onCerrar} disabled={enviando} className={claseBotonSecundario}>
           Volver

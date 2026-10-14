@@ -7,7 +7,8 @@ import path from "node:path";
 const SALIDA = path.join("public", "plantilla_empleados_simulacros.xlsx");
 const FILAS_EMPLEADOS = 300;
 
-const ROJO = "FFB91C1C";
+const NAVY = "FF1B2A4A"; // azul marino LGV Consultora
+const ORO = "FFC9A84C";
 const AMARILLO_CLARO = "FFFFF9C4";
 const GRIS_CLARO = "FFF3F4F6";
 const BORDE = { style: "thin", color: { argb: "FFD1D5DB" } };
@@ -18,20 +19,20 @@ const relleno = (argb) => ({ type: "pattern", pattern: "solid", fgColor: { argb 
 
 function estiloEncabezado(celda) {
   celda.font = fuente({ bold: true, color: { argb: "FFFFFFFF" } });
-  celda.fill = relleno(ROJO);
+  celda.fill = relleno(NAVY);
   celda.alignment = { vertical: "middle", horizontal: "center" };
   celda.border = BORDES;
 }
 
 const libro = new ExcelJS.Workbook();
-libro.creator = "Sistema de Simulacros";
+libro.creator = "LGV Consultora – Sistema de Simulacros";
 libro.created = new Date();
 
 // ---------------------------------------------------------------------
 // Hoja "Instrucciones"
 // ---------------------------------------------------------------------
 const instrucciones = libro.addWorksheet("Instrucciones", {
-  properties: { tabColor: { argb: ROJO } },
+  properties: { tabColor: { argb: ORO } },
 });
 instrucciones.columns = [
   { width: 16 },
@@ -45,7 +46,8 @@ instrucciones.columns = [
 instrucciones.mergeCells("A1:F1");
 const titulo = instrucciones.getCell("A1");
 titulo.value = "Plantilla de carga – Sistema de Simulacros";
-titulo.font = fuente({ size: 16, bold: true, color: { argb: ROJO } });
+titulo.border = { bottom: { style: "medium", color: { argb: ORO } } };
+titulo.font = fuente({ size: 16, bold: true, color: { argb: NAVY } });
 instrucciones.getRow(1).height = 28;
 
 const pasos = [

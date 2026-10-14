@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { Modal } from "@/components/Modal";
-import { claseBotonPrimario, claseBotonSecundario } from "@/components/clases";
+import { claseBotonPrimario, claseBotonSecundario, claseSubtitulo } from "@/components/clases";
 import { ETIQUETA_ROL } from "@/lib/empleados";
 import type { DatosEmpresaExcel, FilaImportada } from "@/lib/importar-excel";
 import { importarEmpleados, type ResultadoImportacion } from "./actions";
@@ -95,9 +95,9 @@ export function ImportarExcel({
             <p className="text-3xl font-semibold text-green-700">{resultado.guardados}</p>
             <p className="text-sm text-green-800">guardados</p>
           </div>
-          <div className="rounded-lg border border-red-200 bg-marca-claro p-4 text-center">
-            <p className="text-3xl font-semibold text-marca">{filasEvaluadas.length - resultado.guardados}</p>
-            <p className="text-sm text-marca-oscuro">con errores (no guardados)</p>
+          <div className="rounded-lg border border-red-200 bg-alerta-claro p-4 text-center">
+            <p className="text-3xl font-semibold text-alerta">{filasEvaluadas.length - resultado.guardados}</p>
+            <p className="text-sm text-alerta-oscuro">con errores (no guardados)</p>
           </div>
         </div>
         <ul className="mt-4 space-y-1 text-sm text-gray-600">
@@ -133,9 +133,9 @@ export function ImportarExcel({
               className="mt-1.5 block w-full text-sm text-gray-600 file:mr-3 file:rounded-md file:border-0 file:bg-gray-100 file:px-3 file:py-2 file:text-sm file:font-medium file:text-gray-700 hover:file:bg-gray-200"
             />
           </label>
-          {leyendo && <p className="mt-2 text-sm text-gray-500">Leyendo {nombreArchivo}…</p>}
+          {leyendo && <p className="mt-2 text-sm text-gray-600">Leyendo {nombreArchivo}…</p>}
           {errorLectura && (
-            <p role="alert" className="mt-2 rounded-md border border-red-200 bg-marca-claro px-3 py-2 text-sm text-marca-oscuro">
+            <p role="alert" className="mt-2 rounded-md border border-red-200 bg-alerta-claro px-3 py-2 text-sm text-alerta-oscuro">
               {errorLectura}
             </p>
           )}
@@ -146,7 +146,7 @@ export function ImportarExcel({
             <div className="flex flex-wrap gap-2 text-sm">
               <span className="rounded-full bg-gray-100 px-3 py-1 text-gray-700">{filasEvaluadas.length} filas leídas</span>
               <span className="rounded-full bg-green-50 px-3 py-1 text-green-700">{validas.length} válidas</span>
-              <span className="rounded-full bg-marca-claro px-3 py-1 text-marca-oscuro">{conErrores} con errores</span>
+              <span className="rounded-full bg-alerta-claro px-3 py-1 text-alerta-oscuro">{conErrores} con errores</span>
             </div>
 
             <fieldset className="grid gap-2 sm:grid-cols-2">
@@ -160,7 +160,7 @@ export function ImportarExcel({
                 <label
                   key={valor}
                   className={`flex cursor-pointer gap-3 rounded-lg border p-3 text-sm ${
-                    modo === valor ? "border-marca bg-marca-claro/60" : "border-gray-200"
+                    modo === valor ? "border-marca-navy bg-marca-celeste" : "border-gray-200"
                   }`}
                 >
                   <input
@@ -169,11 +169,11 @@ export function ImportarExcel({
                     value={valor}
                     checked={modo === valor}
                     onChange={() => setModo(valor)}
-                    className="mt-0.5 accent-marca"
+                    className="mt-0.5 accent-marca-navy"
                   />
                   <span>
                     <span className="block font-medium text-gray-900">{titulo}</span>
-                    <span className="text-gray-500">{texto}</span>
+                    <span className="text-gray-600">{texto}</span>
                   </span>
                 </label>
               ))}
@@ -192,7 +192,7 @@ export function ImportarExcel({
                   type="checkbox"
                   checked={actualizarEmpresa}
                   onChange={(e) => setActualizarEmpresa(e.target.checked)}
-                  className="mt-0.5 accent-marca"
+                  className="mt-0.5 accent-marca-navy"
                 />
                 <span>
                   <span className="block font-medium text-gray-900">
@@ -224,14 +224,14 @@ export function ImportarExcel({
 
             <div>
               <div className="mb-2 flex items-center justify-between gap-3">
-                <h3 className="text-sm font-medium text-gray-700">Vista previa</h3>
+                <h3 className={claseSubtitulo}>Vista previa</h3>
                 {conErrores > 0 && (
                   <label className="flex items-center gap-2 text-sm text-gray-600">
                     <input
                       type="checkbox"
                       checked={soloErrores}
                       onChange={(e) => setSoloErrores(e.target.checked)}
-                      className="accent-marca"
+                      className="accent-marca-navy"
                     />
                     Ver solo filas con errores
                   </label>
@@ -239,7 +239,7 @@ export function ImportarExcel({
               </div>
               <div className="max-h-80 overflow-auto rounded-lg border border-gray-200">
                 <table className="min-w-full text-left text-sm">
-                  <thead className="sticky top-0 bg-gray-50 text-xs text-gray-500 uppercase">
+                  <thead className="sticky top-0 bg-marca-navy text-xs tracking-wider text-white uppercase">
                     <tr>
                       <th className="px-3 py-2">Fila</th>
                       <th className="px-3 py-2">Nombre</th>
@@ -253,7 +253,7 @@ export function ImportarExcel({
                   <tbody className="divide-y divide-gray-100">
                     {visibles.map((f) => (
                       <tr key={f.fila} className={f.datos ? "" : "bg-red-50 text-red-900"}>
-                        <td className="px-3 py-2 align-top text-gray-500">{f.fila}</td>
+                        <td className="px-3 py-2 align-top text-gray-600">{f.fila}</td>
                         <td className="px-3 py-2 align-top">{f.entrada.nombre}</td>
                         <td className="px-3 py-2 align-top">{f.entrada.apellido}</td>
                         <td className="px-3 py-2 align-top">{f.entrada.email}</td>
@@ -262,7 +262,7 @@ export function ImportarExcel({
                         <td className="px-3 py-2 align-top">
                           {f.datos ? ETIQUETA_ROL[f.datos.rol] : f.entrada.rol}
                           {!f.datos && (
-                            <ul className="mt-1 min-w-48 text-xs font-medium text-marca">
+                            <ul className="mt-1 min-w-48 text-xs font-medium text-alerta">
                               {f.errores.map((error) => (
                                 <li key={error}>• {error}</li>
                               ))}
@@ -277,7 +277,7 @@ export function ImportarExcel({
             </div>
 
             {resultado && !resultado.ok && (
-              <p role="alert" className="rounded-md border border-red-200 bg-marca-claro px-3 py-2 text-sm text-marca-oscuro">
+              <p role="alert" className="rounded-md border border-red-200 bg-alerta-claro px-3 py-2 text-sm text-alerta-oscuro">
                 {resultado.error}
               </p>
             )}

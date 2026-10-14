@@ -91,7 +91,7 @@ export function FormularioSimulacro({
             onChange={cambiar("fecha_hora")}
             required
           />
-          <span className="mt-1 block text-xs font-normal text-gray-500">Hora de Mendoza (UTC−3).</span>
+          <span className="mt-1 block text-xs font-normal text-gray-600">Hora de Mendoza (UTC−3).</span>
         </label>
 
         <label className="block text-sm font-medium text-gray-700">
@@ -102,13 +102,13 @@ export function FormularioSimulacro({
             onChange={cambiar("instrucciones_coordinadores")}
             placeholder="Ej: Coordinadores de piso: verificar que no quede nadie en baños y oficinas. Brigadistas: llevar el botiquín al punto de encuentro…"
           />
-          <span className="mt-1 block text-xs font-normal text-gray-500">
+          <span className="mt-1 block text-xs font-normal text-gray-600">
             Solo las reciben los empleados con rol Coordinador o Brigadista.
           </span>
         </label>
 
         {errores.length > 0 && (
-          <ul role="alert" className="list-inside list-disc rounded-md border border-red-200 bg-marca-claro px-3 py-2 text-sm text-marca-oscuro">
+          <ul role="alert" className="list-inside list-disc rounded-md border border-red-200 bg-alerta-claro px-3 py-2 text-sm text-alerta-oscuro">
             {errores.map((error) => (
               <li key={error}>{error}</li>
             ))}

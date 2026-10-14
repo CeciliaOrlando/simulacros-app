@@ -26,8 +26,8 @@ export default async function PaginaEmpleados({ searchParams }: PageProps<"/pane
     <section>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-gray-900">Empleados</h1>
-          <p className="mt-1 text-sm text-gray-500">
+          <h1 className="text-2xl font-bold text-marca-navy">Empleados</h1>
+          <p className="mt-1 text-sm text-gray-600">
             {empresa ? `Personal de ${empresa.nombre}${empresa.nombre.endsWith(".") ? "" : "."}` : "Alta, baja y edición del personal de la empresa."}
           </p>
         </div>
@@ -36,7 +36,7 @@ export default async function PaginaEmpleados({ searchParams }: PageProps<"/pane
 
       <div className="mt-6">
         {!empresa ? (
-          <div className="rounded-lg border border-dashed border-gray-300 bg-white px-6 py-14 text-center text-sm text-gray-500">
+          <div className="rounded-lg border border-dashed border-gray-300 bg-white px-6 py-14 text-center text-sm text-gray-600">
             {esSuperadmin
               ? "Todavía no hay empresas creadas."
               : "No se encontró la empresa asociada a tu usuario."}

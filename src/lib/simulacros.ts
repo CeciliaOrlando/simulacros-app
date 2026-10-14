@@ -22,9 +22,9 @@ export const ETIQUETA_ESTADO: Record<EstadoSimulacro, string> = {
 };
 
 export const COLOR_ESTADO: Record<EstadoSimulacro, string> = {
-  programado: "bg-gray-100 text-gray-700",
-  aviso_enviado: "bg-amber-100 text-amber-800",
-  en_curso: "bg-marca-claro text-marca-oscuro",
+  programado: "bg-marca-celeste-2 text-marca-navy",
+  aviso_enviado: "bg-marca-oro-suave text-marca-navy",
+  en_curso: "bg-alerta-claro text-alerta-oscuro",
   finalizado: "bg-green-100 text-green-800",
 };
 

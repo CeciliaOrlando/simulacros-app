@@ -29,7 +29,7 @@ export function Modal({
   }, [onCerrar]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-gray-900/50 sm:items-center sm:p-4">
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-marca-navy/60 sm:items-center sm:p-4">
       <div
         role="dialog"
         aria-modal="true"
@@ -38,8 +38,8 @@ export function Modal({
           ancho === "xl" ? "sm:max-w-5xl" : "sm:max-w-lg"
         }`}
       >
-        <div className="flex items-center justify-between gap-4 border-b border-gray-200 px-5 py-4">
-          <h2 id={idTitulo} className="text-lg font-semibold text-gray-900">
+        <div className="flex items-center justify-between gap-4 border-b-2 border-marca-oro px-5 py-4">
+          <h2 id={idTitulo} className="font-serif text-lg font-bold text-marca-navy">
             {titulo}
           </h2>
           <button
