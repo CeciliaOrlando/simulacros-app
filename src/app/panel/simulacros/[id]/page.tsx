@@ -1,31 +1,26 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ETIQUETA_ROL, type RolEmpleado } from "@/lib/empleados";
+import { claseSubtitulo } from "@/components/clases";
+import { obtenerTextoPlantilla } from "@/lib/alarma";
+import { COLUMNAS_ENVIO, type EnvioDetalle } from "@/lib/envios";
 import { COLOR_ESTADO, ETIQUETA_ESTADO, ETIQUETA_HIPOTESIS, type Simulacro } from "@/lib/simulacros";
+import { smsConfigurado } from "@/lib/sms/proveedor";
+import { armarSms } from "@/lib/sms/texto";
 import { createClient } from "@/lib/supabase/server";
 import { ZONA_HORARIA, formatearFecha, formatearHora } from "@/lib/zona-horaria";
-import { claseSubtitulo } from "@/components/clases";
 import { AccionesSimulacro } from "./AccionesSimulacro";
+import { PanelEnvios } from "./PanelEnvios";
 
 export const metadata: Metadata = { title: "Detalle del simulacro" };
 
-type Envio = {
-  id: string;
-  canal: "email" | "sms";
-  tipo: "aviso" | "alarma" | "fin";
-  estado: "pendiente" | "enviado" | "fallido";
-  error: string | null;
-  enviado_at: string | null;
-  empleados: { nombre: string; apellido: string; email: string | null; rol: RolEmpleado } | null;
-};
+// Las acciones de esta página (encolar SMS, mandar mails) pueden tardar varios segundos.
+export const maxDuration = 60;
 
-const ETIQUETA_TIPO_ENVIO = { aviso: "Aviso", alarma: "Alarma", fin: "Fin" } as const;
-const COLOR_ESTADO_ENVIO = {
-  pendiente: "bg-marca-celeste-2 text-marca-navy",
-  enviado: "bg-green-100 text-green-800",
-  fallido: "bg-alerta-claro text-alerta-oscuro",
-} as const;
+type Empresa = { nombre: string; zona_resguardo: string | null; punto_encuentro: string | null };
+
+const formatearMomento = (fecha: string) =>
+  new Date(fecha).toLocaleString("es-AR", { timeZone: ZONA_HORARIA, dateStyle: "short", timeStyle: "short" });
 
 export default async function PaginaDetalleSimulacro({ params }: PageProps<"/panel/simulacros/[id]">) {
   const { id } = await params;
@@ -34,32 +29,44 @@ export default async function PaginaDetalleSimulacro({ params }: PageProps<"/pan
   // RLS garantiza que el gerente solo vea simulacros de su empresa.
   const { data: simulacro } = await supabase
     .from("simulacros")
-    .select("id, empresa_id, hipotesis, fecha_hora, instrucciones_coordinadores, estado, created_at, empresas(nombre, zona_resguardo, punto_encuentro)")
+    .select(
+      "id, empresa_id, hipotesis, fecha_hora, instrucciones_coordinadores, estado, inicio_automatico, iniciado_at, finalizado_at, created_at, empresas(nombre, zona_resguardo, punto_encuentro)",
+    )
     .eq("id", id)
-    .maybeSingle<Simulacro & { empresas: { nombre: string; zona_resguardo: string | null; punto_encuentro: string | null } | null }>();
-  if (!simulacro) notFound();
+    .maybeSingle<Simulacro & { empresas: Empresa | null }>();
+  if (!simulacro?.empresas) notFound();
+  const empresa = simulacro.empresas;
 
-  const [{ data: envios }, { count: destinatarios }] = await Promise.all([
-    supabase
-      .from("envios")
-      .select("id, canal, tipo, estado, error, enviado_at, empleados(nombre, apellido, email, rol)")
-      .eq("simulacro_id", id)
-      .order("created_at")
-      .returns<Envio[]>(),
+  const { data: auth } = await supabase.auth.getClaims();
+  const emailUsuario = auth?.claims?.email;
+
+  const [{ data: envios }, { data: empleados }, textoInicio, textoFin] = await Promise.all([
+    supabase.from("envios").select(COLUMNAS_ENVIO).eq("simulacro_id", id).order("created_at").returns<EnvioDetalle[]>(),
     supabase
       .from("empleados")
-      .select("id", { count: "exact", head: true })
+      .select("email, celular")
       .eq("empresa_id", simulacro.empresa_id)
-      .not("email", "is", null),
+      .returns<{ email: string | null; celular: string | null }[]>(),
+    obtenerTextoPlantilla(supabase, simulacro.empresa_id, simulacro.hipotesis),
+    obtenerTextoPlantilla(supabase, simulacro.empresa_id, "fin"),
   ]);
 
-  const lista = envios ?? [];
-  const resumen = {
-    enviado: lista.filter((e) => e.estado === "enviado").length,
-    fallido: lista.filter((e) => e.estado === "fallido").length,
-    pendiente: lista.filter((e) => e.estado === "pendiente").length,
+  const lista = empleados ?? [];
+  const destinatariosEmail = lista.filter((e) => e.email).length;
+  const destinatariosCelular = lista.filter((e) => e.celular).length;
+  // Para el SMS de prueba se propone el celular del usuario, si también está cargado como empleado.
+  const celularUsuario = lista.find((e) => emailUsuario && e.email === emailUsuario)?.celular?.replace(/^\+/, "") ?? "";
+
+  const textoEstado: Record<Simulacro["estado"], string> = {
+    programado: simulacro.inicio_automatico
+      ? "El aviso por mail sale 48 h antes y la alarma SMS se dispara sola a la hora programada."
+      : "El aviso por mail sale 48 h antes. La alarma SMS se dispara con el botón «Iniciar simulacro».",
+    aviso_enviado: simulacro.inicio_automatico
+      ? "Aviso enviado. La alarma SMS se dispara sola a la hora programada, o podés iniciarla ahora."
+      : "Aviso enviado. Iniciá el simulacro con el botón cuando llegue el momento.",
+    en_curso: "Simulacro en curso. Cuando termine, tocá «Finalizar simulacro» para avisar a todos.",
+    finalizado: "Simulacro finalizado.",
   };
-  const empresa = simulacro.empresas;
 
   return (
     <section className="max-w-5xl">
@@ -75,7 +82,7 @@ export default async function PaginaDetalleSimulacro({ params }: PageProps<"/pan
           <h1 className="text-2xl font-bold text-marca-navy">
             Simulacro de {ETIQUETA_HIPOTESIS[simulacro.hipotesis].toLowerCase()}
           </h1>
-          <p className="mt-1 text-sm text-gray-600">{empresa?.nombre}</p>
+          <p className="mt-1 text-sm text-gray-600">{empresa.nombre}</p>
         </div>
         <span className={`self-start rounded-full px-3 py-1 text-sm font-medium ${COLOR_ESTADO[simulacro.estado]}`}>
           {ETIQUETA_ESTADO[simulacro.estado]}
@@ -87,11 +94,19 @@ export default async function PaginaDetalleSimulacro({ params }: PageProps<"/pan
           <Dato titulo="Fecha" valor={formatearFecha(simulacro.fecha_hora)} />
           <Dato titulo="Hora (Mendoza)" valor={formatearHora(simulacro.fecha_hora)} />
           <Dato titulo="Hipótesis" valor={ETIQUETA_HIPOTESIS[simulacro.hipotesis]} />
-          <Dato titulo="Destinatarios con email" valor={String(destinatarios ?? 0)} />
-          <Dato titulo="Zona de resguardo" valor={empresa?.zona_resguardo || "Sin cargar"} />
-          <Dato titulo="Punto de encuentro" valor={empresa?.punto_encuentro || "Sin cargar"} />
+          <Dato
+            titulo="Inicio de la alarma"
+            valor={simulacro.inicio_automatico ? "Automático a la hora programada" : "Manual con el botón"}
+          />
+          <Dato titulo="Destinatarios" valor={`${destinatariosCelular} con celular · ${destinatariosEmail} con email`} />
+          {simulacro.iniciado_at && <Dato titulo="Iniciado" valor={formatearMomento(simulacro.iniciado_at)} />}
+          {simulacro.finalizado_at && <Dato titulo="Finalizado" valor={formatearMomento(simulacro.finalizado_at)} />}
+          <Dato titulo="Zona de resguardo" valor={empresa.zona_resguardo || "Sin cargar"} />
+          <Dato titulo="Punto de encuentro" valor={empresa.punto_encuentro || "Sin cargar"} />
           <div className="sm:col-span-2">
-            <dt className="text-xs font-semibold tracking-wider text-marca-navy uppercase">Instrucciones para coordinadores y brigadistas</dt>
+            <dt className="text-xs font-semibold tracking-wider text-marca-navy uppercase">
+              Instrucciones para coordinadores y brigadistas
+            </dt>
             <dd className="mt-1 text-sm whitespace-pre-line text-gray-900">
               {simulacro.instrucciones_coordinadores || <span className="text-gray-400">Sin instrucciones.</span>}
             </dd>
@@ -100,13 +115,17 @@ export default async function PaginaDetalleSimulacro({ params }: PageProps<"/pan
 
         <div className="rounded-lg border border-gray-200 border-t-4 border-t-marca-oro bg-marca-celeste-2/40 p-5 shadow-sm">
           <h2 className={claseSubtitulo}>Acciones</h2>
-          <p className="mt-1 mb-4 text-sm text-gray-600">
-            {simulacro.estado === "programado"
-              ? "El aviso por mail se envía automáticamente 48 h antes, o podés enviarlo ahora."
-              : "El aviso ya fue enviado: el simulacro no se puede editar ni cancelar."}
-          </p>
-          <AccionesSimulacro simulacro={simulacro} cantidadDestinatarios={destinatarios ?? 0} />
-          {(!empresa?.zona_resguardo || !empresa?.punto_encuentro) && simulacro.estado === "programado" && (
+          <p className="mt-1 mb-4 text-sm text-gray-600">{textoEstado[simulacro.estado]}</p>
+          <AccionesSimulacro
+            simulacro={simulacro}
+            destinatariosEmail={destinatariosEmail}
+            destinatariosCelular={destinatariosCelular}
+            smsConfigurado={smsConfigurado()}
+            celularPorDefecto={celularUsuario}
+            textoSmsInicio={armarSms(empresa.nombre, textoInicio)}
+            textoSmsFin={armarSms(empresa.nombre, textoFin)}
+          />
+          {(!empresa.zona_resguardo || !empresa.punto_encuentro) && simulacro.estado === "programado" && (
             <p className="mt-4 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
               La empresa no tiene cargada la zona de resguardo o el punto de encuentro: en el mail saldrá «A confirmar».
               Podés cargarlos importando la plantilla en Empleados.
@@ -115,56 +134,12 @@ export default async function PaginaDetalleSimulacro({ params }: PageProps<"/pan
         </div>
       </div>
 
-      <div className="mt-8">
-        <div className="flex flex-wrap items-baseline justify-between gap-2">
-          <h2 className={claseSubtitulo}>Envíos ({lista.length})</h2>
-          {lista.length > 0 && (
-            <p className="text-sm text-gray-600">
-              {resumen.enviado} enviados · {resumen.fallido} fallidos
-              {resumen.pendiente > 0 && ` · ${resumen.pendiente} pendientes`}
-            </p>
-          )}
-        </div>
-        <div className="mt-3 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
-          {lista.length === 0 ? (
-            <p className="px-6 py-8 text-center text-sm text-gray-600">Todavía no se realizaron envíos.</p>
-          ) : (
-            <ul className="divide-y divide-gray-100">
-              {lista.map((envio) => (
-                <li key={envio.id} className="flex flex-col gap-1 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium text-gray-900">
-                      {envio.empleados ? `${envio.empleados.nombre} ${envio.empleados.apellido}` : "Empleado eliminado"}
-                      {envio.empleados && (
-                        <span className="ml-2 text-xs font-normal text-gray-600">{ETIQUETA_ROL[envio.empleados.rol]}</span>
-                      )}
-                    </p>
-                    <p className="truncate text-sm text-gray-600">
-                      {envio.canal === "email" ? "Email" : "SMS"} · {ETIQUETA_TIPO_ENVIO[envio.tipo]}
-                      {envio.empleados?.email && ` · ${envio.empleados.email}`}
-                    </p>
-                    {envio.error && <p className="mt-0.5 text-xs text-alerta">{envio.error}</p>}
-                  </div>
-                  <div className="flex shrink-0 items-center gap-3">
-                    {envio.enviado_at && (
-                      <span className="text-xs text-gray-600">
-                        {new Date(envio.enviado_at).toLocaleString("es-AR", {
-                          timeZone: ZONA_HORARIA,
-                          dateStyle: "short",
-                          timeStyle: "short",
-                        })}
-                      </span>
-                    )}
-                    <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${COLOR_ESTADO_ENVIO[envio.estado]}`}>
-                      {envio.estado.charAt(0).toUpperCase() + envio.estado.slice(1)}
-                    </span>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      </div>
+      <PanelEnvios
+        key={`${simulacro.estado}-${envios?.length ?? 0}`}
+        simulacroId={simulacro.id}
+        estadoInicial={simulacro.estado}
+        enviosIniciales={envios ?? []}
+      />
     </section>
   );
 }

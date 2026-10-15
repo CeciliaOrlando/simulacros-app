@@ -81,3 +81,13 @@ export function formatearHora(fecha: string | Date): string {
   }).format(new Date(fecha));
   return `${hora} h`;
 }
+
+/**
+ * "10:31:05" en hora de Mendoza. Se arma a mano (y no con toLocaleTimeString) para
+ * que el servidor y el navegador produzcan exactamente el mismo texto al hidratar.
+ */
+export function formatearHoraConSegundos(fecha: string | Date): string {
+  const p = partes(new Date(fecha));
+  const dos = (n: number) => String(n).padStart(2, "0");
+  return `${dos(p.hora)}:${dos(p.minuto)}:${dos(p.segundo)}`;
+}

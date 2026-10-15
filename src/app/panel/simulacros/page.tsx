@@ -17,7 +17,7 @@ export default async function PaginaSimulacros({ searchParams }: PageProps<"/pan
   const { data } = empresa
     ? await supabase
         .from("simulacros")
-        .select("id, empresa_id, hipotesis, fecha_hora, instrucciones_coordinadores, estado, created_at")
+        .select("id, empresa_id, hipotesis, fecha_hora, instrucciones_coordinadores, estado, inicio_automatico, iniciado_at, finalizado_at, created_at")
         .eq("empresa_id", empresa.id)
         .order("fecha_hora", { ascending: true })
         .returns<Simulacro[]>()

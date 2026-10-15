@@ -20,6 +20,11 @@ Web app para que gerentes de distintas empresas programen simulacros de emergenc
 - `src/app/panel` — panel con Empleados, Simulacros y Reportes.
 - `src/app/api/cron` — envía los avisos por mail 48 h antes (requiere `Authorization: Bearer $CRON_SECRET`).
 - `src/lib/avisos.ts` — envío de avisos con Brevo y registro en `envios`.
+- `src/lib/alarma.ts` — alarma por SMS: inicio, fin, reintentos y estado de cada SMS.
+- `src/lib/sms/` — interfaz `SmsProvider` e implementación `SmsGateProvider` (SMSGate en modo Cloud).
+
+## Base de datos
+Ejecutar en orden en el SQL Editor de Supabase: `001_inicial.sql`, `002_sms.sql`.
 
 ## Probar el cron a mano
 ```bash

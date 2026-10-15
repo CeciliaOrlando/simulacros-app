@@ -19,6 +19,13 @@ const SECCIONES = [
     ),
   },
   {
+    href: "/panel/plantillas",
+    nombre: "Plantillas SMS",
+    icono: (
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2ZM8 9h8M8 13h5" />
+    ),
+  },
+  {
     href: "/panel/reportes",
     nombre: "Reportes",
     icono: <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" />,

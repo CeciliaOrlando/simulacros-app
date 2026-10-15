@@ -84,32 +84,11 @@ export function generarMailAviso(d: DatosMailAviso): { asunto: string; html: str
           </tr>`
       : "";
 
-  const html = `<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>${escapar(asunto)}</title>
-</head>
-<body style="margin:0;padding:0;background:${CELESTE};font-family:'Open Sans',Arial,Helvetica,sans-serif;">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${CELESTE};padding:24px 12px;">
-    <tr>
-      <td align="center">
-        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#FFFFFF;border-radius:8px;overflow:hidden;border:1px solid #E5E7EB;">
-          <tr>
-            <td style="background:${NAVY};border-bottom:3px solid ${ORO};padding:22px 28px;color:#FFFFFF;">
-              <table role="presentation" cellpadding="0" cellspacing="0">
-                <tr>
-                  <td style="padding-right:16px;vertical-align:middle;">${logoHtml()}</td>
-                  <td style="vertical-align:middle;">
-                    <p style="margin:0;font-size:11px;font-weight:bold;letter-spacing:3px;text-transform:uppercase;color:${ORO};">LGV Consultora</p>
-                    <p style="margin:4px 0 0 0;font-size:12px;letter-spacing:1px;text-transform:uppercase;color:#D6E8F7;">${d.esPrueba ? "Mail de prueba · " : ""}Aviso de simulacro</p>
-                    <h1 style="margin:6px 0 0 0;font-family:${SERIF};font-size:22px;line-height:1.3;color:#FFFFFF;">${escapar(d.empresa.nombre)}</h1>
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
+  const html = marcoMail({
+    titulo: asunto,
+    etiqueta: `${d.esPrueba ? "Mail de prueba · " : ""}Aviso de simulacro`,
+    empresaNombre: d.empresa.nombre,
+    filas: `
           <tr>
             <td style="padding:28px 32px 8px 32px;font-size:15px;line-height:1.6;color:#111827;">
               <p style="margin:0 0 12px 0;">Hola ${escapar(d.destinatario.nombre)}:</p>
@@ -128,19 +107,8 @@ export function generarMailAviso(d: DatosMailAviso): { asunto: string; html: str
                 <strong>IMPORTANTE:</strong> mantené activadas las notificaciones de mensajes de texto (SMS) con sonido y vibración. El inicio del simulacro se avisará por SMS.
               </div>
             </td>
-          </tr>${seccionInstrucciones}
-          <tr>
-            <td style="padding:24px 32px 28px 32px;font-size:12px;line-height:1.5;color:#4B5563;border-top:1px solid ${ORO};">
-              Este es un aviso automático del Sistema de Simulacros. Por favor, no respondas este mail.<br>
-              <strong style="color:${NAVY};">LGV Consultora</strong> · Asesoramiento profesional en Higiene y Seguridad en el Trabajo
-            </td>
-          </tr>
-        </table>
-      </td>
-    </tr>
-  </table>
-</body>
-</html>`;
+          </tr>${seccionInstrucciones}`,
+  });
 
   const texto = [
     `${d.esPrueba ? "MAIL DE PRUEBA - " : ""}AVISO DE SIMULACRO - ${d.empresa.nombre}`,
@@ -163,5 +131,93 @@ export function generarMailAviso(d: DatosMailAviso): { asunto: string; html: str
     "LGV Consultora · Asesoramiento profesional en Higiene y Seguridad en el Trabajo",
   ].join("\n");
 
+  return { asunto, html, texto };
+}
+
+/** Documento HTML con el encabezado y el pie de LGV Consultora. `filas` son <tr> del cuerpo. */
+function marcoMail({
+  titulo,
+  etiqueta,
+  empresaNombre,
+  filas,
+}: {
+  titulo: string;
+  etiqueta: string;
+  empresaNombre: string;
+  filas: string;
+}): string {
+  return `<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${escapar(titulo)}</title>
+</head>
+<body style="margin:0;padding:0;background:${CELESTE};font-family:'Open Sans',Arial,Helvetica,sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${CELESTE};padding:24px 12px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#FFFFFF;border-radius:8px;overflow:hidden;border:1px solid #E5E7EB;">
+          <tr>
+            <td style="background:${NAVY};border-bottom:3px solid ${ORO};padding:22px 28px;color:#FFFFFF;">
+              <table role="presentation" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="padding-right:16px;vertical-align:middle;">${logoHtml()}</td>
+                  <td style="vertical-align:middle;">
+                    <p style="margin:0;font-size:11px;font-weight:bold;letter-spacing:3px;text-transform:uppercase;color:${ORO};">LGV Consultora</p>
+                    <p style="margin:4px 0 0 0;font-size:12px;letter-spacing:1px;text-transform:uppercase;color:#D6E8F7;">${escapar(etiqueta)}</p>
+                    <h1 style="margin:6px 0 0 0;font-family:${SERIF};font-size:22px;line-height:1.3;color:#FFFFFF;">${escapar(empresaNombre)}</h1>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>${filas}
+          <tr>
+            <td style="padding:24px 32px 28px 32px;font-size:12px;line-height:1.5;color:#4B5563;border-top:1px solid ${ORO};">
+              Este es un aviso automático del Sistema de Simulacros. Por favor, no respondas este mail.<br>
+              <strong style="color:${NAVY};">LGV Consultora</strong> · Asesoramiento profesional en Higiene y Seguridad en el Trabajo
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+}
+
+/**
+ * Mail de respaldo que acompaña a los SMS de alarma: mismo texto que el SMS,
+ * para quien no tenga señal y como registro.
+ */
+export function generarMailAlarma(d: {
+  empresaNombre: string;
+  destinatario: { nombre: string };
+  textoSms: string;
+  tipo: "alarma" | "fin";
+}): { asunto: string; html: string; texto: string } {
+  const etiqueta = d.tipo === "alarma" ? "Simulacro en curso" : "Simulacro finalizado";
+  const asunto = `${d.tipo === "alarma" ? "[SIMULACRO EN CURSO]" : "[SIMULACRO FINALIZADO]"} ${d.empresaNombre}`;
+  const html = marcoMail({
+    titulo: asunto,
+    etiqueta,
+    empresaNombre: d.empresaNombre,
+    filas: `
+          <tr>
+            <td style="padding:28px 32px 8px 32px;font-size:15px;line-height:1.6;color:#111827;">
+              <p style="margin:0;">Hola ${escapar(d.destinatario.nombre)}:</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:8px 32px 24px 32px;">
+              <div style="padding:18px 20px;background:${CELESTE};border:2px solid ${ORO};border-radius:6px;font-size:17px;line-height:1.5;font-weight:bold;color:${NAVY};">
+                ${conSaltos(d.textoSms)}
+              </div>
+              <p style="margin:14px 0 0 0;font-size:13px;line-height:1.5;color:#4B5563;">Este mail es un respaldo del SMS enviado a tu celular.</p>
+            </td>
+          </tr>`,
+  });
+  const texto = [`${etiqueta.toUpperCase()} - ${d.empresaNombre}`, "", `Hola ${d.destinatario.nombre}:`, "", d.textoSms, "",
+    "Este mail es un respaldo del SMS enviado a tu celular.", "", "LGV Consultora · Asesoramiento profesional en Higiene y Seguridad en el Trabajo"].join("\n");
   return { asunto, html, texto };
 }

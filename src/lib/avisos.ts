@@ -2,6 +2,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { enviarMail } from "@/lib/email/brevo";
 import { generarMailAviso } from "@/lib/email/plantilla-aviso";
+import { enParalelo } from "@/lib/paralelo";
 import type { RolEmpleado } from "@/lib/empleados";
 import type { Simulacro } from "@/lib/simulacros";
 
@@ -109,16 +110,4 @@ export async function enviarAvisosSimulacro(
   });
 
   return { ok: true, enviados, fallidos };
-}
-
-/** Ejecuta la tarea sobre cada elemento, con un máximo de `limite` a la vez. */
-async function enParalelo<T>(items: T[], limite: number, tarea: (item: T) => Promise<void>) {
-  let siguiente = 0;
-  const trabajador = async () => {
-    while (siguiente < items.length) {
-      const item = items[siguiente++];
-      await tarea(item);
-    }
-  };
-  await Promise.all(Array.from({ length: Math.min(limite, items.length) }, trabajador));
 }

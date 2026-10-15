@@ -35,6 +35,10 @@ export type Simulacro = {
   fecha_hora: string;
   instrucciones_coordinadores: string | null;
   estado: EstadoSimulacro;
+  /** true: la alarma SMS se dispara sola a la hora programada; false: con el botón. */
+  inicio_automatico: boolean;
+  iniciado_at: string | null;
+  finalizado_at: string | null;
   created_at: string;
 };
 
@@ -43,12 +47,14 @@ export type EntradaSimulacro = {
   /** Hora de Mendoza en formato "YYYY-MM-DDTHH:mm". */
   fecha_hora: string;
   instrucciones_coordinadores: string;
+  inicio_automatico: boolean;
 };
 
 export type DatosSimulacro = {
   hipotesis: Hipotesis;
   fecha_hora: string;
   instrucciones_coordinadores: string | null;
+  inicio_automatico: boolean;
 };
 
 export function validarSimulacro(
@@ -74,6 +80,7 @@ export function validarSimulacro(
       hipotesis,
       fecha_hora: fecha.toISOString(),
       instrucciones_coordinadores: instrucciones || null,
+      inicio_automatico: entrada.inicio_automatico !== false,
     },
     errores: [],
   };

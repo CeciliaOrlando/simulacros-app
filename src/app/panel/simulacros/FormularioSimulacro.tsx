@@ -21,7 +21,7 @@ export function FormularioSimulacro({
 }: {
   empresaId: string;
   /** Si viene, se edita; si no, se crea uno nuevo. */
-  simulacro: Pick<Simulacro, "id" | "hipotesis" | "fecha_hora" | "instrucciones_coordinadores"> | null;
+  simulacro: Pick<Simulacro, "id" | "hipotesis" | "fecha_hora" | "instrucciones_coordinadores" | "inicio_automatico"> | null;
   onCerrar: () => void;
 }) {
   const router = useRouter();
@@ -29,6 +29,7 @@ export function FormularioSimulacro({
     hipotesis: simulacro?.hipotesis ?? "",
     fecha_hora: simulacro ? fechaAHoraLocal(simulacro.fecha_hora) : "",
     instrucciones_coordinadores: simulacro?.instrucciones_coordinadores ?? "",
+    inicio_automatico: simulacro?.inicio_automatico ?? true,
   });
   const [errores, setErrores] = useState<string[]>([]);
   const [guardando, iniciarGuardado] = useTransition();
@@ -93,6 +94,37 @@ export function FormularioSimulacro({
           />
           <span className="mt-1 block text-xs font-normal text-gray-600">Hora de Mendoza (UTC−3).</span>
         </label>
+
+        <fieldset>
+          <legend className="text-sm font-medium text-gray-700">Inicio del simulacro (alarma por SMS)</legend>
+          <div className="mt-1.5 grid gap-2 sm:grid-cols-2">
+            {(
+              [
+                [true, "Automático", "Los SMS de alarma salen solos a la hora programada."],
+                [false, "Manual", "Los SMS salen cuando alguien toca «Iniciar simulacro»."],
+              ] as const
+            ).map(([valor, titulo, texto]) => (
+              <label
+                key={titulo}
+                className={`flex cursor-pointer gap-3 rounded-lg border p-3 text-sm ${
+                  entrada.inicio_automatico === valor ? "border-marca-navy bg-marca-celeste" : "border-gray-200"
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="inicio_automatico"
+                  checked={entrada.inicio_automatico === valor}
+                  onChange={() => setEntrada((previa) => ({ ...previa, inicio_automatico: valor }))}
+                  className="mt-0.5 accent-marca-navy"
+                />
+                <span>
+                  <span className="block font-medium text-marca-navy">{titulo}</span>
+                  <span className="text-gray-600">{texto}</span>
+                </span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
 
         <label className="block text-sm font-medium text-gray-700">
           Instrucciones para coordinadores y brigadistas
