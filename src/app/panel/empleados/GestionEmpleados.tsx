@@ -6,13 +6,14 @@ import { claseBotonPeligro, claseBotonPrimario, claseBotonSecundario, claseCampo
 import { ETIQUETA_ROL, ROLES, normalizarTexto, type Empleado, type RolEmpleado } from "@/lib/empleados";
 import { eliminarEmpleado } from "./actions";
 import { FormularioEmpleado } from "./FormularioEmpleado";
-import { ImportarExcel } from "./ImportarExcel";
+import { ImportarEmpleados } from "./ImportarEmpleados";
 
 type Dialogo =
   | { tipo: "nuevo" }
   | { tipo: "editar"; empleado: Empleado }
   | { tipo: "eliminar"; empleado: Empleado }
   | { tipo: "importar" }
+  | { tipo: "pegar" }
   | null;
 
 const TITULO_CONTADOR: Record<RolEmpleado, string> = {
@@ -119,6 +120,9 @@ export function GestionEmpleados({
           <button type="button" onClick={() => setDialogo({ tipo: "importar" })} className={claseBotonSecundario}>
             Importar Excel
           </button>
+          <button type="button" onClick={() => setDialogo({ tipo: "pegar" })} className={claseBotonSecundario}>
+            Pegar lista
+          </button>
           <button type="button" onClick={() => setDialogo({ tipo: "nuevo" })} className={claseBotonPrimario}>
             + Agregar empleado
           </button>
@@ -216,14 +220,21 @@ export function GestionEmpleados({
         <FormularioEmpleado
           empresaId={empresaId}
           empleado={dialogo.tipo === "editar" ? dialogo.empleado : null}
+          existentes={empleados}
           onCerrar={cerrar}
         />
       )}
       {dialogo?.tipo === "eliminar" && (
         <ConfirmarEliminar empresaId={empresaId} empleado={dialogo.empleado} onCerrar={cerrar} />
       )}
-      {dialogo?.tipo === "importar" && (
-        <ImportarExcel empresaId={empresaId} empresaActual={empresa} existentes={empleados} onCerrar={cerrar} />
+      {(dialogo?.tipo === "importar" || dialogo?.tipo === "pegar") && (
+        <ImportarEmpleados
+          origen={dialogo.tipo === "importar" ? "excel" : "pegar"}
+          empresaId={empresaId}
+          empresaActual={empresa}
+          existentes={empleados}
+          onCerrar={cerrar}
+        />
       )}
     </>
   );

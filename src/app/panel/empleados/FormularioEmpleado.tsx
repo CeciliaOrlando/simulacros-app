@@ -6,6 +6,8 @@ import { claseBotonPrimario, claseBotonSecundario, claseInput } from "@/componen
 import {
   ETIQUETA_ROL,
   ROLES,
+  formatearCelular,
+  normalizarCelular,
   validarEmpleado,
   type Empleado,
   type EntradaEmpleado,
@@ -15,11 +17,14 @@ import { actualizarEmpleado, crearEmpleado } from "./actions";
 export function FormularioEmpleado({
   empresaId,
   empleado,
+  existentes,
   onCerrar,
 }: {
   empresaId: string;
   /** Si viene, se edita; si no, se crea uno nuevo. */
   empleado: Empleado | null;
+  /** Empleados ya cargados en la empresa, para avisar duplicados sin esperar al servidor. */
+  existentes: Empleado[];
   onCerrar: () => void;
 }) {
   const [entrada, setEntrada] = useState<EntradaEmpleado>({
@@ -33,6 +38,15 @@ export function FormularioEmpleado({
   const [errores, setErrores] = useState<string[]>([]);
   const [guardando, iniciarGuardado] = useTransition();
 
+  const celularNormalizado = entrada.celular.trim() ? normalizarCelular(entrada.celular) : null;
+  const vistaCelular = !celularNormalizado ? (
+    <span className="text-gray-600">Característica + número, con o sin 0 y 15 (ej: 261 610-5828).</span>
+  ) : celularNormalizado.ok ? (
+    <span className="text-green-700">Se guardará como {formatearCelular(celularNormalizado.celular)}</span>
+  ) : (
+    <span className="text-gray-600">Seguí escribiendo: característica + número, con o sin 0 y 15.</span>
+  );
+
   const cambiar = (campo: keyof EntradaEmpleado) =>
     (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
       setEntrada((previa) => ({ ...previa, [campo]: e.target.value }));
@@ -42,6 +56,19 @@ export function FormularioEmpleado({
     const validacion = validarEmpleado(entrada);
     if (!validacion.datos) {
       setErrores(validacion.errores);
+      return;
+    }
+    // El servidor vuelve a verificar duplicados; esto solo adelanta el aviso.
+    const { email, celular } = validacion.datos;
+    const otros = existentes.filter((e) => e.id !== empleado?.id);
+    const conMismoEmail = otros.find((e) => e.email === email);
+    const conMismoCelular = otros.find((e) => e.celular === celular);
+    const duplicados = [
+      conMismoEmail && `Ya existe un empleado con ese email: ${conMismoEmail.nombre} ${conMismoEmail.apellido}.`,
+      conMismoCelular && `Ya existe un empleado con ese celular: ${conMismoCelular.nombre} ${conMismoCelular.apellido}.`,
+    ].filter((d): d is string => Boolean(d));
+    if (duplicados.length > 0) {
+      setErrores(duplicados);
       return;
     }
     setErrores([]);
@@ -73,9 +100,9 @@ export function FormularioEmpleado({
         </label>
         <label className="block text-sm font-medium text-gray-700">
           Celular
-          <input type="tel" inputMode="numeric" className={claseInput} value={entrada.celular} onChange={cambiar("celular")} placeholder="5492614123456" required />
-          <span className="mt-1 block text-xs font-normal text-gray-600">
-            549 + característica + número, sin 0 ni 15.
+          <input type="tel" className={claseInput} value={entrada.celular} onChange={cambiar("celular")} placeholder="261 610-5828" required aria-describedby="ayuda-celular" />
+          <span id="ayuda-celular" className="mt-1 block text-xs font-normal" aria-live="polite">
+            {vistaCelular}
           </span>
         </label>
         <div className="grid gap-4 sm:grid-cols-2">

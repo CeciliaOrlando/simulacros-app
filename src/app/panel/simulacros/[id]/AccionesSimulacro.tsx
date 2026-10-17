@@ -246,15 +246,14 @@ function SmsPrueba({
             Celular
             <input
               type="tel"
-              inputMode="numeric"
               className={claseInput}
               value={telefono}
               onChange={(e) => setTelefono(e.target.value)}
-              placeholder="5492614123456"
+              placeholder="261 610-5828"
               autoFocus
               required
             />
-            <span className="mt-1 block text-xs font-normal text-gray-600">549 + característica + número, sin 0 ni 15.</span>
+            <span className="mt-1 block text-xs font-normal text-gray-600">Característica + número, con o sin 0 y 15 (ej: 261 610-5828).</span>
           </label>
           {error && <p role="alert" className="rounded-md border border-red-200 bg-alerta-claro px-3 py-2 text-sm text-alerta-oscuro">{error}</p>}
           <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">

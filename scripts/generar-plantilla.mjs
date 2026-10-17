@@ -53,7 +53,7 @@ instrucciones.getRow(1).height = 28;
 const pasos = [
   "1. Completá la hoja «Empresa» con los datos de tu empresa.",
   "2. En la hoja «Empleados», cargá una fila por empleado a partir de la fila 2, sin cambiar los títulos de la fila 1.",
-  "3. El celular va como 549 + característica + número, sin 0, sin 15 y sin espacios (ej: 5492614123456).",
+  "3. El celular va con la característica y el número, con o sin 0 y 15, con o sin espacios o guiones (ej: 261 610-5828, 0261 15 6105828 o 5492616105828). El sistema lo convierte solo al formato internacional.",
   "4. El Rol se elige de la lista desplegable: General, Coordinador o Brigadista.",
   "5. Guardá el archivo como .xlsx y subilo en la página (Empleados → Importar Excel).",
 ];
@@ -64,7 +64,8 @@ pasos.forEach((paso, i) => {
   celda.value = paso;
   celda.font = fuente({ size: 11 });
   celda.alignment = { wrapText: true, vertical: "top" };
-  instrucciones.getRow(fila).height = 30;
+  // Unas 90 letras por renglón en el ancho combinado A:F.
+  instrucciones.getRow(fila).height = Math.max(30, Math.ceil(paso.length / 90) * 16 + 4);
 });
 
 const filaEjemploTitulo = 3 + pasos.length + 1;

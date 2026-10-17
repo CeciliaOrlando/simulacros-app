@@ -2,25 +2,37 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { Modal } from "@/components/Modal";
-import { claseBotonPrimario, claseBotonSecundario, claseSubtitulo } from "@/components/clases";
+import { claseBotonPrimario, claseBotonSecundario, claseInput, claseSubtitulo } from "@/components/clases";
 import { ETIQUETA_ROL } from "@/lib/empleados";
-import type { DatosEmpresaExcel, FilaImportada } from "@/lib/importar-excel";
+import {
+  leerTextoPegado,
+  type DatosEmpresaExcel,
+  type FilaImportada,
+  type ResultadoLectura,
+} from "@/lib/importar-filas";
 import { importarEmpleados, type ResultadoImportacion } from "./actions";
 
 type Modo = "agregar" | "reemplazar";
 
-export function ImportarExcel({
+/**
+ * Carga masiva de empleados con vista previa y validación.
+ * origen "excel": se sube la plantilla .xlsx; "pegar": se pegan filas copiadas de Excel o Google Sheets.
+ */
+export function ImportarEmpleados({
+  origen,
   empresaId,
   empresaActual,
   existentes,
   onCerrar,
 }: {
+  origen: "excel" | "pegar";
   empresaId: string;
   empresaActual: { zona_resguardo: string | null; punto_encuentro: string | null };
   existentes: { email: string | null; celular: string | null }[];
   onCerrar: () => void;
 }) {
   const [nombreArchivo, setNombreArchivo] = useState("");
+  const [textoPegado, setTextoPegado] = useState("");
   const [leyendo, setLeyendo] = useState(false);
   const [errorLectura, setErrorLectura] = useState<string | null>(null);
   const [filas, setFilas] = useState<FilaImportada[] | null>(null);
@@ -43,12 +55,24 @@ export function ImportarExcel({
     const { leerPlantilla } = await import("@/lib/importar-excel");
     const lectura = await leerPlantilla(archivo);
     setLeyendo(false);
+    mostrarLectura(lectura, "La hoja «Empleados» no tiene filas cargadas.");
+  }
+
+  function verPegado() {
+    setErrorLectura(null);
+    setResultado(null);
+    mostrarLectura(leerTextoPegado(textoPegado), "No hay filas con datos en lo que pegaste.");
+  }
+
+  function mostrarLectura(lectura: ResultadoLectura, mensajeSinFilas: string) {
     if (!lectura.ok) {
+      setFilas(null);
       setErrorLectura(lectura.error);
       return;
     }
     if (lectura.filas.length === 0) {
-      setErrorLectura("La hoja «Empleados» no tiene filas cargadas.");
+      setFilas(null);
+      setErrorLectura(mensajeSinFilas);
       return;
     }
     setFilas(lectura.filas);
@@ -121,18 +145,55 @@ export function ImportarExcel({
   }
 
   return (
-    <Modal titulo="Importar empleados desde Excel" onCerrar={onCerrar} ancho={filas ? "xl" : "md"}>
+    <Modal
+      titulo={origen === "excel" ? "Importar empleados desde Excel" : "Pegar lista de empleados"}
+      onCerrar={onCerrar}
+      ancho={filas ? "xl" : "md"}
+    >
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Archivo de la plantilla (.xlsx)
-            <input
-              type="file"
-              accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-              onChange={elegirArchivo}
-              className="mt-1.5 block w-full text-sm text-gray-600 file:mr-3 file:rounded-md file:border-0 file:bg-gray-100 file:px-3 file:py-2 file:text-sm file:font-medium file:text-gray-700 hover:file:bg-gray-200"
-            />
-          </label>
+          {origen === "excel" ? (
+            <label className="block text-sm font-medium text-gray-700">
+              Archivo de la plantilla (.xlsx)
+              <input
+                type="file"
+                accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                onChange={elegirArchivo}
+                className="mt-1.5 block w-full text-sm text-gray-600 file:mr-3 file:rounded-md file:border-0 file:bg-gray-100 file:px-3 file:py-2 file:text-sm file:font-medium file:text-gray-700 hover:file:bg-gray-200"
+              />
+            </label>
+          ) : (
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700" htmlFor="texto-pegado">
+                Filas copiadas de Excel o Google Sheets
+              </label>
+              <p className="text-xs text-gray-600">
+                Seleccioná las celdas en tu planilla, copiá (Ctrl+C) y pegá acá (Ctrl+V). Una fila por empleado, en
+                este orden: <strong>Nombre, Apellido, Email, Celular, Área, Rol</strong>. Si copiás también la fila de
+                títulos, se usa para ubicar las columnas.
+              </p>
+              <textarea
+                id="texto-pegado"
+                value={textoPegado}
+                onChange={(e) => setTextoPegado(e.target.value)}
+                className={`${claseInput} font-mono text-xs ${filas ? "min-h-24" : "min-h-48"}`}
+                placeholder={"María\tGonzález\tmaria@empresa.com\t261 610-5828\tAdministración\tCoordinador"}
+                spellCheck={false}
+                wrap="off"
+                autoFocus
+              />
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={verPegado}
+                  disabled={!textoPegado.trim()}
+                  className={filas ? claseBotonSecundario : claseBotonPrimario}
+                >
+                  {filas ? "Actualizar vista previa" : "Ver vista previa"}
+                </button>
+              </div>
+            </div>
+          )}
           {leyendo && <p className="mt-2 text-sm text-gray-600">Leyendo {nombreArchivo}…</p>}
           {errorLectura && (
             <p role="alert" className="mt-2 rounded-md border border-red-200 bg-alerta-claro px-3 py-2 text-sm text-alerta-oscuro">
@@ -154,7 +215,7 @@ export function ImportarExcel({
               {(
                 [
                   ["agregar", "Agregar a los existentes", `Se suman a los ${existentes.length} empleados actuales. Los repetidos se omiten.`],
-                  ["reemplazar", "Reemplazar todo el listado", `Se eliminan los ${existentes.length} empleados actuales y quedan solo los del archivo.`],
+                  ["reemplazar", "Reemplazar todo el listado", `Se eliminan los ${existentes.length} empleados actuales y quedan solo los importados.`],
                 ] as const
               ).map(([valor, titulo, texto]) => (
                 <label
@@ -182,7 +243,7 @@ export function ImportarExcel({
             {modo === "reemplazar" && existentes.length > 0 && (
               <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
                 Atención: se eliminarán los {existentes.length} empleados cargados (y su historial de envíos) y se
-                reemplazarán por las {validas.length} filas válidas del archivo.
+                reemplazarán por las {validas.length} filas válidas.
               </p>
             )}
 
