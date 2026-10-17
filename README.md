@@ -24,7 +24,8 @@ Web app para que gerentes de distintas empresas programen simulacros de emergenc
 - `src/lib/sms/` — interfaz `SmsProvider` e implementación `SmsGateProvider` (SMSGate en modo Cloud).
 
 ## Base de datos
-Ejecutar en orden en el SQL Editor de Supabase: `001_inicial.sql`, `002_sms.sql`.
+Ejecutar en orden en el SQL Editor de Supabase: `001_inicial.sql`, `002_sms.sql`, `003_hipotesis.sql`.
+Para agregar una hipótesis: sumarla en `src/lib/hipotesis.ts` y crear una migración que actualice los checks y `crear_plantillas_sms_por_defecto`.
 
 ## Probar el cron a mano
 ```bash
