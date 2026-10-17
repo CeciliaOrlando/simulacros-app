@@ -1,5 +1,5 @@
 // Mail de aviso de simulacro (HTML con estilos en línea, compatible con la mayoría de los clientes de correo).
-import { ETIQUETA_HIPOTESIS, type Hipotesis } from "@/lib/simulacros";
+import { ETIQUETA_HIPOTESIS, type Hipotesis } from "@/lib/hipotesis";
 import { formatearFecha, formatearFechaCorta, formatearHora } from "@/lib/zona-horaria";
 
 export type DatosMailAviso = {

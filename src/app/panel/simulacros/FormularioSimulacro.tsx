@@ -4,13 +4,8 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { Modal } from "@/components/Modal";
 import { claseBotonPrimario, claseBotonSecundario, claseInput } from "@/components/clases";
-import {
-  ETIQUETA_HIPOTESIS,
-  HIPOTESIS,
-  validarSimulacro,
-  type EntradaSimulacro,
-  type Simulacro,
-} from "@/lib/simulacros";
+import { ETIQUETA_HIPOTESIS, HIPOTESIS } from "@/lib/hipotesis";
+import { validarSimulacro, type EntradaSimulacro, type Simulacro } from "@/lib/simulacros";
 import { fechaAHoraLocal } from "@/lib/zona-horaria";
 import { actualizarSimulacro, crearSimulacro } from "./actions";
 

@@ -1,15 +1,6 @@
 // Tipos y validaciones de simulacros, compartidos entre el navegador y el servidor.
+import { esHipotesis, type Hipotesis } from "@/lib/hipotesis";
 import { horaLocalAFecha } from "@/lib/zona-horaria";
-
-export const HIPOTESIS = ["sismo", "incendio", "evacuacion", "otro"] as const;
-export type Hipotesis = (typeof HIPOTESIS)[number];
-
-export const ETIQUETA_HIPOTESIS: Record<Hipotesis, string> = {
-  sismo: "Sismo",
-  incendio: "Incendio",
-  evacuacion: "Evacuación",
-  otro: "Otro",
-};
 
 export const ESTADOS = ["programado", "aviso_enviado", "en_curso", "finalizado"] as const;
 export type EstadoSimulacro = (typeof ESTADOS)[number];
@@ -63,9 +54,7 @@ export function validarSimulacro(
 ): { datos: DatosSimulacro; errores: [] } | { datos: null; errores: string[] } {
   const errores: string[] = [];
 
-  const hipotesis = (HIPOTESIS as readonly string[]).includes(entrada.hipotesis)
-    ? (entrada.hipotesis as Hipotesis)
-    : null;
+  const hipotesis: Hipotesis | null = esHipotesis(entrada.hipotesis) ? entrada.hipotesis : null;
   if (!hipotesis) errores.push("Elegí la hipótesis del simulacro");
 
   const fecha = horaLocalAFecha(entrada.fecha_hora);

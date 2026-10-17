@@ -19,13 +19,8 @@ import { normalizarCelular } from "@/lib/empleados";
 import { empresaPermitida } from "@/lib/empresa-activa";
 import { COLUMNAS_ENVIO, type EnvioDetalle } from "@/lib/envios";
 import { obtenerPerfil } from "@/lib/perfil";
-import {
-  validarSimulacro,
-  type EntradaSimulacro,
-  type EstadoSimulacro,
-  type Hipotesis,
-  type Simulacro,
-} from "@/lib/simulacros";
+import { type Hipotesis } from "@/lib/hipotesis";
+import { validarSimulacro, type EntradaSimulacro, type EstadoSimulacro, type Simulacro } from "@/lib/simulacros";
 import { MENSAJE_SMS_NO_CONFIGURADO, obtenerProveedorSms } from "@/lib/sms/proveedor";
 import { armarSms } from "@/lib/sms/texto";
 import { createClient } from "@/lib/supabase/server";

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { claseSubtitulo } from "@/components/clases";
-import { COLOR_ESTADO, ETIQUETA_ESTADO, ETIQUETA_HIPOTESIS, type Simulacro } from "@/lib/simulacros";
+import { ETIQUETA_HIPOTESIS } from "@/lib/hipotesis";
+import { COLOR_ESTADO, ETIQUETA_ESTADO, type Simulacro } from "@/lib/simulacros";
 import { ZONA_HORARIA, formatearFecha, formatearHora } from "@/lib/zona-horaria";
 
 export function ListaSimulacros({ titulo, simulacros, vacio }: { titulo: string; simulacros: Simulacro[]; vacio: string }) {

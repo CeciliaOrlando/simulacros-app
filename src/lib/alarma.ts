@@ -6,7 +6,7 @@ import { enviarMail } from "@/lib/email/brevo";
 import { generarMailAlarma } from "@/lib/email/plantilla-aviso";
 import type { RolEmpleado } from "@/lib/empleados";
 import { enParalelo } from "@/lib/paralelo";
-import type { Hipotesis } from "@/lib/simulacros";
+import { type Hipotesis } from "@/lib/hipotesis";
 import {
   MENSAJE_SMS_NO_CONFIGURADO,
   obtenerProveedorSms,

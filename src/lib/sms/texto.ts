@@ -1,24 +1,20 @@
 // Textos de SMS: plantillas por defecto, prefijo y limpieza de caracteres.
 // Se usa en el navegador (contador) y en el servidor (al guardar y al enviar).
+import { HIPOTESIS, LISTA_HIPOTESIS, type Hipotesis } from "@/lib/hipotesis";
 
-export const CLAVES_PLANTILLA = ["sismo", "incendio", "evacuacion", "otro", "fin"] as const;
-export type ClavePlantilla = (typeof CLAVES_PLANTILLA)[number];
+// Una plantilla de inicio por hipótesis (en el orden de @/lib/hipotesis) más la de fin.
+export const CLAVES_PLANTILLA = [...HIPOTESIS, "fin"] as const;
+export type ClavePlantilla = Hipotesis | "fin";
 
-export const ETIQUETA_PLANTILLA: Record<ClavePlantilla, string> = {
-  sismo: "Inicio – Sismo",
-  incendio: "Inicio – Incendio",
-  evacuacion: "Inicio – Evacuación",
-  otro: "Inicio – Otro",
+export const ETIQUETA_PLANTILLA = {
+  ...Object.fromEntries(LISTA_HIPOTESIS.map((h) => [h.clave, `Inicio – ${h.nombre}`])),
   fin: "Fin del simulacro",
-};
+} as Record<ClavePlantilla, string>;
 
-export const PLANTILLAS_POR_DEFECTO: Record<ClavePlantilla, string> = {
-  sismo: "INICIO DE SIMULACRO DE SISMO MAGNITUD 8. MANTENER LA CALMA, BUSCAR ZONA DE RESGUARDO",
-  incendio: "INICIO DE SIMULACRO INCENDIO DECLARADO. EVACUACION DE EMERGENCIA A PUNTO DE ENCUENTRO",
-  evacuacion: "INICIO DE SIMULACRO DE EVACUACION A ZONA DE SEGURIDAD Y POSTERIORMENTE A PUNTO DE ENCUENTRO",
-  otro: "INICIO DE SIMULACRO. SEGUIR LAS INSTRUCCIONES DE LOS COORDINADORES",
+export const PLANTILLAS_POR_DEFECTO = {
+  ...Object.fromEntries(LISTA_HIPOTESIS.map((h) => [h.clave, h.smsPorDefecto])),
   fin: "FIN DEL SIMULACRO. GRACIAS POR SU PARTICIPACION",
-};
+} as Record<ClavePlantilla, string>;
 
 /** Un SMS simple admite 160 caracteres sin tildes; con una sola tilde baja a 70. */
 export const LARGO_MAXIMO_SMS = 160;
